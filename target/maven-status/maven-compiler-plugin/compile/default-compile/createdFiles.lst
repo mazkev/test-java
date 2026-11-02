@@ -5,6 +5,7 @@ com\belajar\model\OrderStatus.class
 com\belajar\controller\OrderController$CheckoutRequest.class
 com\belajar\controller\OrderController$UpdateStatusRequest.class
 com\belajar\model\Order.class
+com\belajar\service\OrderService.class
 com\belajar\repository\OrderRepository.class
 com\belajar\controller\OrderController.class
 com\belajar\MyApiApplication.class
