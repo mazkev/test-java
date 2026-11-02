@@ -4,29 +4,59 @@ GET http://localhost:8080/api/products
 ### 2. GET Detail Produk by ID
 GET http://localhost:8080/api/products/1
 
-### 3. POST Tambah Produk Baru
+### 3. POST Tambah Produk 1 (Kopi)
 POST http://localhost:8080/api/products
 Content-Type: application/json
 
 {
-  "name": "Sepatu Lari Nike",
-  "description": "Ukuran 42 warna hitam",
+  "name": "Kopi Gayo Arabika",
+  "description": "Biji kopi sangrai premium 250g",
+  "price": 85000.0,
+  "stock": 50,
+  "category": "Minuman"
+}
+
+### 4. POST Tambah Produk 2 (Sepatu)
+POST http://localhost:8080/api/products
+Content-Type: application/json
+
+{
+  "name": "Sepatu Lari Nike Pegasus",
+  "description": "Ukuran 42 warna hitam sporty",
   "price": 850000.0,
   "stock": 15,
   "category": "Sepatu"
 }
 
-### 4. PUT Update Produk by ID
+### 5. POST Tambah Produk 3 (Keyboard)
+POST http://localhost:8080/api/products
+Content-Type: application/json
+
+{
+  "name": "Mechanical Keyboard RGB",
+  "description": "Switch Biru, Layout 75% tactile",
+  "price": 450000.0,
+  "stock": 20,
+  "category": "Elektronik"
+}
+
+### 6. Cari Produk Berdasarkan Nama (Search Keyword "kopi" atau "nike")
+GET http://localhost:8080/api/products/search?name=kopi
+
+### 7. Filter Produk Berdasarkan Kategori (Category "Elektronik" atau "Minuman")
+GET http://localhost:8080/api/products/category/Minuman
+
+### 8. PUT Update Produk by ID
 PUT http://localhost:8080/api/products/1
 Content-Type: application/json
 
 {
-  "name": "Kopi Gayo Arabika 250g",
+  "name": "Kopi Gayo Arabika Special Blend",
   "description": "Promo diskon akhir pekan!",
   "price": 75000.0,
   "stock": 100,
   "category": "Minuman"
 }
 
-### 5. DELETE Produk by ID
+### 9. DELETE Produk by ID
 DELETE http://localhost:8080/api/products/2

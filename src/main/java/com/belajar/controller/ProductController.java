@@ -63,4 +63,17 @@ public class ProductController {
         }
         return ResponseEntity.notFound().build();
     }
+
+        // 6. [GET] Cari produk berdasarkan nama -> GET /api/products/search?name=kopi
+    @GetMapping("/search")
+    public List<Product> searchByName(@RequestParam String name) {
+        return productRepository.findByNameContainingIgnoreCase(name);
+    }
+
+    // 7. [GET] Filter produk berdasarkan kategori -> GET /api/products/category/Minuman
+    @GetMapping("/category/{category}")
+    public List<Product> getByCategory(@PathVariable String category) {
+        return productRepository.findByCategory(category);
+    }
+
 }
