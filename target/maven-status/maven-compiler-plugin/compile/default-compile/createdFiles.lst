@@ -1,3 +1,4 @@
+com\belajar\model\Product.class
+com\belajar\repository\ProductRepository.class
 com\belajar\controller\ProductController.class
-com\belajar\controller\ProductController$Product.class
 com\belajar\MyApiApplication.class
