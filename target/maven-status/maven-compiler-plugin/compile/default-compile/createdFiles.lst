@@ -1,4 +1,8 @@
 com\belajar\model\Product.class
 com\belajar\repository\ProductRepository.class
 com\belajar\controller\ProductController.class
+com\belajar\controller\OrderController$CheckoutRequest.class
+com\belajar\model\Order.class
+com\belajar\repository\OrderRepository.class
+com\belajar\controller\OrderController.class
 com\belajar\MyApiApplication.class
