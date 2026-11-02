@@ -8,7 +8,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/orders")
@@ -19,7 +18,6 @@ public class OrderController {
     public record CheckoutRequest(Long productId, Integer quantity) {}
     public record UpdateStatusRequest(OrderStatus status) {}
 
-    // Controller sekarang cukup menyuntikkan OrderService!
     public OrderController(OrderService orderService) {
         this.orderService = orderService;
     }
@@ -29,27 +27,17 @@ public class OrderController {
         return orderService.getAllOrders();
     }
 
+    // Bebas dari try-catch! Bersih 1 baris
     @PostMapping
-    public ResponseEntity<?> checkout(@RequestBody CheckoutRequest request) {
-        try {
-            Order order = orderService.checkout(request.productId(), request.quantity());
-            return new ResponseEntity<>(order, HttpStatus.CREATED);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", e.getMessage()));
-        } catch (IllegalStateException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
-        }
+    public ResponseEntity<Order> checkout(@RequestBody CheckoutRequest request) {
+        Order order = orderService.checkout(request.productId(), request.quantity());
+        return new ResponseEntity<>(order, HttpStatus.CREATED);
     }
 
+    // Bebas dari try-catch!
     @PutMapping("/{id}/status")
-    public ResponseEntity<?> updateStatus(@PathVariable Long id, @RequestBody UpdateStatusRequest request) {
-        try {
-            Order order = orderService.updateStatus(id, request.status());
-            return ResponseEntity.ok(order);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", e.getMessage()));
-        } catch (IllegalStateException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
-        }
+    public ResponseEntity<Order> updateStatus(@PathVariable Long id, @RequestBody UpdateStatusRequest request) {
+        Order order = orderService.updateStatus(id, request.status());
+        return ResponseEntity.ok(order);
     }
 }

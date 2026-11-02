@@ -9,4 +9,5 @@ com\belajar\controller\OrderController.class
 com\belajar\repository\ProductRepository.class
 com\belajar\controller\ProductController.class
 com\belajar\controller\OrderController$CheckoutRequest.class
+com\belajar\exception\GlobalExceptionHandler.class
 com\belajar\MyApiApplication.class
