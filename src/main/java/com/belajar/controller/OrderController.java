@@ -69,4 +69,41 @@ public class OrderController {
 
         return new ResponseEntity<>(savedOrder, HttpStatus.CREATED);
     }
+
+        // DTO untuk request update status
+    public record UpdateStatusRequest(com.belajar.model.OrderStatus status) {}
+
+    // 3. [PUT] Update Status Pesanan -> PUT http://localhost:8080/api/orders/1/status
+    @PutMapping("/{id}/status")
+    @Transactional
+    public ResponseEntity<?> updateStatus(@PathVariable Long id, @RequestBody UpdateStatusRequest request) {
+        var orderOpt = orderRepository.findById(id);
+        if (orderOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("error", "Order dengan ID " + id + " tidak ditemukan!"));
+        }
+
+        var order = orderOpt.get();
+
+        // Jika order sudah pernah dibatalkan, status tidak boleh diubah lagi
+        if (order.getStatus() == com.belajar.model.OrderStatus.CANCELLED) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("error", "Order yang sudah CANCELLED tidak bisa diubah statusnya lagi!"));
+        }
+
+        // FITUR PINTAR: Jika dibatalkan (CANCELLED), kembalikan stok barang ke tabel produk!
+        if (request.status() == com.belajar.model.OrderStatus.CANCELLED) {
+            productRepository.findById(order.getProductId()).ifPresent(product -> {
+                product.setStock(product.getStock() + order.getQuantity()); // Tambah kembali stok
+                productRepository.save(product);
+            });
+        }
+
+        // Simpan status baru
+        order.setStatus(request.status());
+        orderRepository.save(order);
+
+        return ResponseEntity.ok(order);
+    }
+
 }

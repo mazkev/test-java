@@ -17,6 +17,10 @@ public class Order {
     private Double totalPrice;
     private LocalDateTime orderDate;
 
+    // Tambahan baru: Status Pesanan
+    @Enumerated(EnumType.STRING)
+    private OrderStatus status;
+
     public Order() {}
 
     public Order(Long productId, String productName, Integer quantity, Double totalPrice) {
@@ -24,7 +28,8 @@ public class Order {
         this.productName = productName;
         this.quantity = quantity;
         this.totalPrice = totalPrice;
-        this.orderDate = LocalDateTime.now(); // Catat tanggal & jam saat order dibuat
+        this.orderDate = LocalDateTime.now();
+        this.status = OrderStatus.PENDING; // Pesanan baru otomatis berstatus PENDING
     }
 
     // Getter dan Setter
@@ -45,4 +50,7 @@ public class Order {
 
     public LocalDateTime getOrderDate() { return orderDate; }
     public void setOrderDate(LocalDateTime orderDate) { this.orderDate = orderDate; }
+
+    public OrderStatus getStatus() { return status; }
+    public void setStatus(OrderStatus status) { this.status = status; }
 }

@@ -1,7 +1,7 @@
 ### 1. GET Semua Produk
 GET http://localhost:8080/api/products
 
-### 2. POST Tambah Produk 1 (Kopi Gayo, Stok: 50, Harga: 85000)
+### 2. POST Tambah Produk (Kopi Gayo, Stok: 50, Harga: 85000)
 POST http://localhost:8080/api/products
 Content-Type: application/json
 
@@ -13,54 +13,71 @@ Content-Type: application/json
   "category": "Minuman"
 }
 
-### 3. POST Tambah Produk 2 (Sepatu Nike, Stok: 15, Harga: 850000)
-POST http://localhost:8080/api/products
-Content-Type: application/json
-
-{
-  "name": "Sepatu Lari Nike Pegasus",
-  "description": "Ukuran 42 warna hitam sporty",
-  "price": 850000.0,
-  "stock": 15,
-  "category": "Sepatu"
-}
-
 ### ========================================================
-### FITUR TRANSAKSI MARKETPLACE (ORDERS / CHECKOUT)
+### FITUR TRANSAKSI & SIKLUS ORDER (MARKETPLACE)
 ### ========================================================
 
-### 4. CHECKOUT BERHASIL: Beli 2 Kopi Gayo (ID: 1, Qty: 2)
-# Ekspektasi: Total 170.000, Stok Kopi berkurang dari 50 -> 48
+### 3. CHECKOUT: Beli 5 Kopi Gayo (ID: 1, Qty: 5)
+# Status awal: PENDING, Total: 425.000, Sisa Stok Kopi: 50 -> 45
 POST http://localhost:8080/api/orders
 Content-Type: application/json
 
 {
   "productId": 1,
-  "quantity": 2
+  "quantity": 5
 }
 
-### 5. CHECKOUT GAGAL: Beli melebihi stok (ID: 1, Qty: 999)
-# Ekspektasi: 400 Bad Request ("Stok tidak mencukupi!")
-POST http://localhost:8080/api/orders
-Content-Type: application/json
-
-{
-  "productId": 1,
-  "quantity": 999
-}
-
-### 6. CHECKOUT GAGAL: Barang tidak ada (ID: 999)
-# Ekspektasi: 404 Not Found
-POST http://localhost:8080/api/orders
-Content-Type: application/json
-
-{
-  "productId": 999,
-  "quantity": 1
-}
-
-### 7. GET Semua Riwayat Pesanan
-GET http://localhost:8080/api/orders
-
-### 8. Cek Sisa Stok Kopi setelah checkout (Harusnya tinggal 48)
+### 4. Cek Sisa Stok Kopi (Harusnya tinggal 45)
 GET http://localhost:8080/api/products/1
+
+### 5. UPDATE STATUS: Pembeli Melakukan Pembayaran (PAID)
+PUT http://localhost:8080/api/orders/1/status
+Content-Type: application/json
+
+{
+  "status": "PAID"
+}
+
+### 6. UPDATE STATUS: Penjual Mengirim Barang (SHIPPED)
+PUT http://localhost:8080/api/orders/1/status
+Content-Type: application/json
+
+{
+  "status": "SHIPPED"
+}
+
+### 7. UPDATE STATUS: Pembeli Konfirmasi Barang Diterima (DELIVERED)
+PUT http://localhost:8080/api/orders/1/status
+Content-Type: application/json
+
+{
+  "status": "DELIVERED"
+}
+
+### ========================================================
+### UJI COBA PEMBATALAN ORDER (RESTOCK OTOMATIS)
+### ========================================================
+
+### 8. CHECKOUT BARU: Beli 10 Kopi Gayo (Sisa Stok: 45 -> 35)
+POST http://localhost:8080/api/orders
+Content-Type: application/json
+
+{
+  "productId": 1,
+  "quantity": 10
+}
+
+### 9. BATALKAN ORDER ID 2: Ubah status jadi CANCELLED
+# Ekspektasi: Order dibatalkan, dan 10 kopi otomatis dikembalikan ke stok (35 -> 45)
+PUT http://localhost:8080/api/orders/2/status
+Content-Type: application/json
+
+{
+  "status": "CANCELLED"
+}
+
+### 10. Cek Stok Kopi Kembali Pulih Menjadi 45!
+GET http://localhost:8080/api/products/1
+
+### 11. Cek Seluruh Riwayat Orders
+GET http://localhost:8080/api/orders
