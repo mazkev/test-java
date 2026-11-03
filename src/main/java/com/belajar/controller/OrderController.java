@@ -5,6 +5,7 @@ import com.belajar.model.OrderStatus;
 import com.belajar.service.OrderService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -15,8 +16,7 @@ public class OrderController {
 
     private final OrderService orderService;
 
-    // DTO Checkout: Menerima ID pembeli dan daftar barang yang dibeli
-    public record CheckoutRequest(Long buyerId, List<OrderService.CartItemDto> items) {}
+    public record CheckoutRequest(List<OrderService.CartItemDto> items) {}
     public record UpdateStatusRequest(OrderStatus status) {}
 
     public OrderController(OrderService orderService) {
@@ -29,8 +29,12 @@ public class OrderController {
     }
 
     @PostMapping
-    public ResponseEntity<Order> checkout(@RequestBody CheckoutRequest request) {
-        Order order = orderService.checkout(request.buyerId(), request.items());
+    public ResponseEntity<Order> checkout(
+            @RequestBody CheckoutRequest request,
+            Authentication authentication) {
+        // Ambil email pembeli dari Token JWT yang login
+        String buyerEmail = authentication.getName();
+        Order order = orderService.checkout(buyerEmail, request.items());
         return new ResponseEntity<>(order, HttpStatus.CREATED);
     }
 

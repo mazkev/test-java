@@ -113,3 +113,30 @@ Authorization: Bearer {{loginSeller.response.body.token}}
 # Di terminal console server log query SQL AKAN MUNCUL KEMBALI mengambil data terbaru!
 GET http://localhost:8080/api/products/1
 
+
+### ========================================================
+### 4. UJI COBA EVENT-DRIVEN ARCHITECTURE (@Async WORKER)
+### ========================================================
+
+### 4.1 Checkout Pesanan Menggunakan Token BUYER (Budi Santoso)
+# Ekspektasi: Respon 201 Created kembali INSTAN (<50ms)!
+# Perhatikan Terminal Console Server:
+# Log [ASYNC WORKER] akan muncul berjalan di thread latar belakang (background)
+# dan mengirim email invoice setelah 2 detik tanpa membuat request HTTP menunggu.
+POST http://localhost:8080/api/orders
+Content-Type: application/json
+Authorization: Bearer {{loginBuyer.response.body.token}}
+
+{
+  "items": [
+    {
+      "productId": 1,
+      "quantity": 2
+    }
+  ]
+}
+
+### 4.2 Cek Riwayat Seluruh Pesanan
+GET http://localhost:8080/api/orders
+
+
