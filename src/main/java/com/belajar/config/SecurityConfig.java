@@ -39,6 +39,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/users/**").permitAll()
                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
                 .requestMatchers("/h2-console/**").permitAll()
+                .requestMatchers("/actuator/**").permitAll() 
                 
                 // Manajemen produk (Upload, Edit, Hapus) WAJIB login dengan role SELLER!
                 .requestMatchers(HttpMethod.POST, "/api/products").hasRole("SELLER")

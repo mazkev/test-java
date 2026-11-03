@@ -140,3 +140,28 @@ Authorization: Bearer {{loginBuyer.response.body.token}}
 GET http://localhost:8080/api/orders
 
 
+### ========================================================
+### 5. OBSERVABILITAS & HEALTH CHECK (SPRING BOOT ACTUATOR)
+### ========================================================
+
+### 5.1 Cek Kesehatan Server (Database SQL, Disk Space, Status Aplikasi)
+# Ekspektasi: 200 OK dengan status "UP" dan detail status database
+GET http://localhost:8080/actuator/health
+
+### 5.2 Kubernetes Liveness Probe (Apakah Pod Server Masih Hidup?)
+GET http://localhost:8080/actuator/health/liveness
+
+### 5.3 Kubernetes Readiness Probe (Apakah Server Siap Menerima Traffic?)
+GET http://localhost:8080/actuator/health/readiness
+
+### 5.4 Pantau Konsumsi Memori RAM JVM (Heap Memory)
+GET http://localhost:8080/actuator/metrics/jvm.memory.used
+
+### 5.5 Pantau Database Connection Pool (HikariCP Active Connections)
+GET http://localhost:8080/actuator/metrics/hikaricp.connections.active
+
+### 5.6 Lihat Daftar Seluruh Metrik Server yang Tersedia
+GET http://localhost:8080/actuator/metrics
+
+
+
