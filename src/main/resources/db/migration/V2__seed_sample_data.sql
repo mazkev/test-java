@@ -2,7 +2,7 @@
 INSERT INTO users (id, name, email, password, role)
 VALUES (1, 'Toko Kopi Nusantara', 'kopinusantara@mail.com', '$2a$10$mqS4UPEBAMgfs3iyySyqreCJRZNsD7t21r5P5b8n2Vdxujg607Lca', 'SELLER');
 
--- 2. Buat User Pembeli (Budi Santoso) dengan password: passwordBudi123
+-- 2. Buat User Pembeli (Budi Santoso) dengan password: rahasiaKopi123
 INSERT INTO users (id, name, email, password, role)
 VALUES (2, 'Budi Santoso', 'budi@mail.com', '$2a$10$mqS4UPEBAMgfs3iyySyqreCJRZNsD7t21r5P5b8n2Vdxujg607Lca', 'BUYER');
 
