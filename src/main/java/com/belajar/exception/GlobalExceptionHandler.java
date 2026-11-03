@@ -50,5 +50,15 @@ public class GlobalExceptionHandler {
             "errors", errors
         ));
     }
+        // Menangkap benturan Concurrency / Race Condition Flash Sale (409 Conflict)
+    @ExceptionHandler(org.springframework.orm.ObjectOptimisticLockingFailureException.class)
+    public ResponseEntity<?> handleOptimisticLockingFailure() {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of(
+            "timestamp", LocalDateTime.now().toString(),
+            "status", 409,
+            "error", "Conflict / Race Condition",
+            "message", "Produk sedang diperebutkan oleh pembeli lain secara bersamaan. Silakan coba kembali!"
+        ));
+    }
 
 }

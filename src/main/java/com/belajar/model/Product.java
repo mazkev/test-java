@@ -20,6 +20,8 @@ public class Product {
     @JoinColumn(name = "seller_id")
     private User seller;
 
+    @Version
+    private Long version;
     // Constructor kosong (Wajib untuk JPA)
     public Product() {}
 
@@ -53,5 +55,9 @@ public class Product {
 
     public User getSeller() { return seller; }
     public void setSeller(User seller) { this.seller = seller; }
+
+    public Long getVersion() { return version; }
+    public void setVersion(Long version) { this.version = version; }
+
 
 }
