@@ -15,7 +15,8 @@ public class OrderController {
 
     private final OrderService orderService;
 
-    public record CheckoutRequest(Long productId, Integer quantity) {}
+    // DTO Checkout: Menerima ID pembeli dan daftar barang yang dibeli
+    public record CheckoutRequest(Long buyerId, List<OrderService.CartItemDto> items) {}
     public record UpdateStatusRequest(OrderStatus status) {}
 
     public OrderController(OrderService orderService) {
@@ -27,14 +28,12 @@ public class OrderController {
         return orderService.getAllOrders();
     }
 
-    // Bebas dari try-catch! Bersih 1 baris
     @PostMapping
     public ResponseEntity<Order> checkout(@RequestBody CheckoutRequest request) {
-        Order order = orderService.checkout(request.productId(), request.quantity());
+        Order order = orderService.checkout(request.buyerId(), request.items());
         return new ResponseEntity<>(order, HttpStatus.CREATED);
     }
 
-    // Bebas dari try-catch!
     @PutMapping("/{id}/status")
     public ResponseEntity<Order> updateStatus(@PathVariable Long id, @RequestBody UpdateStatusRequest request) {
         Order order = orderService.updateStatus(id, request.status());

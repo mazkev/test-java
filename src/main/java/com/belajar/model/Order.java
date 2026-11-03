@@ -2,6 +2,8 @@ package com.belajar.model;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "orders")
@@ -11,42 +13,47 @@ public class Order {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Long productId;
-    private String productName;
-    private Integer quantity;
-    private Double totalPrice;
+    // Relasi: Pesanan dibuat oleh seorang Pembeli (User)
+    @ManyToOne
+    @JoinColumn(name = "buyer_id")
+    private User buyer;
+
+    // Relasi: 1 Order memiliki banyak OrderItem (CascadeType.ALL otomatis simpan items bersama order)
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<OrderItem> items = new ArrayList<>();
+
+    private Double totalAmount;
     private LocalDateTime orderDate;
 
-    // Tambahan baru: Status Pesanan
     @Enumerated(EnumType.STRING)
     private OrderStatus status;
 
     public Order() {}
 
-    public Order(Long productId, String productName, Integer quantity, Double totalPrice) {
-        this.productId = productId;
-        this.productName = productName;
-        this.quantity = quantity;
-        this.totalPrice = totalPrice;
+    public Order(User buyer) {
+        this.buyer = buyer;
         this.orderDate = LocalDateTime.now();
-        this.status = OrderStatus.PENDING; // Pesanan baru otomatis berstatus PENDING
+        this.status = OrderStatus.PENDING;
+        this.totalAmount = 0.0;
+    }
+
+    public void addItem(OrderItem item) {
+        items.add(item);
+        this.totalAmount += item.getSubtotal();
     }
 
     // Getter dan Setter
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
-    public Long getProductId() { return productId; }
-    public void setProductId(Long productId) { this.productId = productId; }
+    public User getBuyer() { return buyer; }
+    public void setBuyer(User buyer) { this.buyer = buyer; }
 
-    public String getProductName() { return productName; }
-    public void setProductName(String productName) { this.productName = productName; }
+    public List<OrderItem> getItems() { return items; }
+    public void setItems(List<OrderItem> items) { this.items = items; }
 
-    public Integer getQuantity() { return quantity; }
-    public void setQuantity(Integer quantity) { this.quantity = quantity; }
-
-    public Double getTotalPrice() { return totalPrice; }
-    public void setTotalPrice(Double totalPrice) { this.totalPrice = totalPrice; }
+    public Double getTotalAmount() { return totalAmount; }
+    public void setTotalAmount(Double totalAmount) { this.totalAmount = totalAmount; }
 
     public LocalDateTime getOrderDate() { return orderDate; }
     public void setOrderDate(LocalDateTime orderDate) { this.orderDate = orderDate; }
