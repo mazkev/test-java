@@ -40,8 +40,10 @@ public class SecurityConfig {
                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
                 .requestMatchers("/h2-console/**").permitAll()
                 
-                // Upload produk WAJIB login dengan role SELLER!
+                // Manajemen produk (Upload, Edit, Hapus) WAJIB login dengan role SELLER!
                 .requestMatchers(HttpMethod.POST, "/api/products").hasRole("SELLER")
+                .requestMatchers(HttpMethod.PUT, "/api/products/**").hasRole("SELLER")
+                .requestMatchers(HttpMethod.DELETE, "/api/products/**").hasRole("SELLER")
                 
                 // Checkout pesanan WAJIB login dengan role BUYER!
                 .requestMatchers(HttpMethod.POST, "/api/orders").hasRole("BUYER")

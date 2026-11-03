@@ -25,7 +25,7 @@ Content-Type: application/json
 }
 
 ### 1.3 Login Toko Kopi Nusantara (Ambil Token JWT SELLER)
-# Copy string token yang didapat dari respon JSON ini:
+# @name loginSeller
 POST http://localhost:8080/api/auth/login
 Content-Type: application/json
 
@@ -35,6 +35,7 @@ Content-Type: application/json
 }
 
 ### 1.4 Login Budi Santoso (Ambil Token JWT BUYER)
+# @name loginBuyer
 POST http://localhost:8080/api/auth/login
 Content-Type: application/json
 
@@ -61,18 +62,17 @@ Content-Type: application/json
   "category": "Minuman"
 }
 
-### 2.2 UJI COBA 2: Upload Produk DENGAN Token SELLER (Ganti <TOKEN_SELLER> di bawah)
-# Ekspektasi: 201 Created! Produk otomatis dimiliki oleh Toko Kopi Nusantara
-# Perhatikan: Tidak ada lagi "sellerId" di dalam body JSON!
+### 2.2 UJI COBA 2: Upload Produk DENGAN Token SELLER Otomatis
+# Ekspektasi: 201 Created! (Token diambil otomatis dari response loginSeller di atas)
 POST http://localhost:8080/api/products
 Content-Type: application/json
-Authorization: Bearer <TEMPELKAN_TOKEN_SELLER_DARI_STEP_1.3_DISINI>
+Authorization: Bearer {{loginSeller.response.body.token}}
 
 {
-  "name": "Kopi Gayo Arabika Asli",
-  "description": "Biji kopi sangrai premium 250g",
-  "price": 85000.0,
-  "stock": 50,
+  "name": "Kopi Flores Bajawa",
+  "description": "Biji kopi single origin premium 250g",
+  "price": 95000.0,
+  "stock": 30,
   "category": "Minuman"
 }
 
@@ -95,9 +95,11 @@ GET http://localhost:8080/api/products/1
 GET http://localhost:8080/api/products/1
 
 ### 3.3 Update Produk ID 1 (Cache EVICT / Hapus Cache)
-# Begitu produk diupdate, cache ID 1 otomatis dibersihkan
+# WAJIB membawa Token SELLER (Otomatis dari {{loginSeller.response.body.token}})
+# Begitu produk diupdate, cache ID 1 otomatis dibersihkan dari RAM!
 PUT http://localhost:8080/api/products/1
 Content-Type: application/json
+Authorization: Bearer {{loginSeller.response.body.token}}
 
 {
   "name": "Kopi Gayo Arabika Premium (Updated)",
