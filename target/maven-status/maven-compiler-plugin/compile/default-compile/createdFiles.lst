@@ -14,6 +14,7 @@ com\belajar\controller\ProductController$CreateProductRequest.class
 com\belajar\repository\ProductRepository.class
 com\belajar\service\OrderService$CartItemDto.class
 com\belajar\controller\ProductController.class
+com\belajar\config\OpenApiConfig.class
 com\belajar\controller\OrderController$CheckoutRequest.class
 com\belajar\model\Role.class
 com\belajar\controller\UserController.class
