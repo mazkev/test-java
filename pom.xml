@@ -43,6 +43,12 @@
             <artifactId>h2</artifactId>
             <scope>runtime</scope>
         </dependency>
+                <!-- 4. Validasi Input Otomatis -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
+        </dependency>
+
     </dependencies>
 
 

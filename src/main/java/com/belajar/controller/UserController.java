@@ -8,6 +8,11 @@ import com.belajar.repository.UserRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+
 
 import java.util.List;
 
@@ -18,7 +23,18 @@ public class UserController {
     private final UserRepository userRepository;
     private final ProductRepository productRepository;
 
-    public record CreateUserRequest(String name, String email, Role role) {}
+    public record CreateUserRequest(
+    @NotBlank(message = "Nama tidak boleh kosong!")
+    String name,
+
+    @NotBlank(message = "Email tidak boleh kosong!")
+    @Email(message = "Format email tidak valid!")
+    String email,
+
+    @NotNull(message = "Role wajib diisi (BUYER atau SELLER)!")
+    Role role
+) {}
+
 
     public UserController(UserRepository userRepository, ProductRepository productRepository) {
         this.userRepository = userRepository;
@@ -36,7 +52,7 @@ public class UserController {
 
     // 2. [POST] Registrasi Pengguna Baru (Buka Toko atau Buat Akun Pembeli)
     @PostMapping
-    public ResponseEntity<User> registerUser(@RequestBody CreateUserRequest request) {
+    public ResponseEntity<User> registerUser(@Valid @RequestBody CreateUserRequest request) {
         // Cek apakah email sudah terdaftar
         userRepository.findByEmail(request.email()).ifPresent(u -> {
             throw new IllegalStateException("Email " + request.email() + " sudah terdaftar!");

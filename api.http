@@ -1,8 +1,43 @@
 ### ========================================================
-### 1. PERSIAPAN DATA (SELLER & PRODUK)
+### 1. UJI VALIDASI BEAN (DATA CACAT DITOLAK OTOMATIS)
 ### ========================================================
 
-### 1.1 Buka Toko: Toko Kopi Nusantara (SELLER)
+### 1.1 UJI VALIDASI USER: Email Cacat & Nama Kosong
+# Ekspektasi: 400 Bad Request dengan rincian field error:
+# - "name": "Nama tidak boleh kosong!"
+# - "email": "Format email tidak valid!"
+POST http://localhost:8080/api/users
+Content-Type: application/json
+
+{
+  "name": "",
+  "email": "bukan-alamat-email",
+  "role": "BUYER"
+}
+
+### 1.2 UJI VALIDASI PRODUK: Harga Negatif, Nama Kosong & Stok Minus
+# Ekspektasi: 400 Bad Request dengan rincian 3 field error:
+# - "name": "Nama produk tidak boleh kosong!"
+# - "price": "Harga produk harus lebih besar dari 0!"
+# - "stock": "Stok produk tidak boleh bernilai negatif!"
+POST http://localhost:8080/api/products
+Content-Type: application/json
+
+{
+  "name": "",
+  "description": "Barang cacat",
+  "price": -50000.0,
+  "stock": -10,
+  "category": "Minuman",
+  "sellerId": 1
+}
+
+
+### ========================================================
+### 2. DATA VALID (SUKSES DITERIMA)
+### ========================================================
+
+### 2.1 Buka Toko yang Valid (SELLER)
 POST http://localhost:8080/api/users
 Content-Type: application/json
 
@@ -12,68 +47,18 @@ Content-Type: application/json
   "role": "SELLER"
 }
 
-### 1.2 Toko Upload Produk 1: Kopi Gayo (Harga: 85.000)
+### 2.2 Upload Produk yang Valid (Harga Positif, Stok Valid)
 POST http://localhost:8080/api/products
 Content-Type: application/json
 
 {
   "name": "Kopi Gayo Arabika",
-  "description": "Biji kopi premium 250g",
+  "description": "Biji kopi sangrai 250g",
   "price": 85000.0,
   "stock": 50,
   "category": "Minuman",
   "sellerId": 1
 }
 
-### 1.3 Toko Upload Produk 2: Kopi Robusta Lampung (Harga: 45.000)
-POST http://localhost:8080/api/products
-Content-Type: application/json
-
-{
-  "name": "Kopi Robusta Lampung",
-  "description": "Kopi hitam mantap 250g",
-  "price": 45000.0,
-  "stock": 40,
-  "category": "Minuman",
-  "sellerId": 1
-}
-
-### 1.4 Toko Upload Produk 3: Mesin Kopi Espresso (Harga: 2.500.000)
-POST http://localhost:8080/api/products
-Content-Type: application/json
-
-{
-  "name": "Mesin Espresso Otomatis",
-  "description": "15 Bar Italian Pump",
-  "price": 2500000.0,
-  "stock": 10,
-  "category": "Elektronik",
-  "sellerId": 1
-}
-
-
-### ========================================================
-### 2. PENGUJIAN PAGING & SORTING (FITUR SKALA BESAR)
-### ========================================================
-
-### 2.1 Paging Default (Semua Produk)
-GET http://localhost:8080/api/products
-
-### 2.2 Paging + Sorting: Urutkan Barang Termahal ke Termurah (sort=price,desc) & Ambil 2 per halaman
-# Ekspektasi: 
-# - Item 1: Mesin Espresso (2.500.000)
-# - Item 2: Kopi Gayo (85.000)
-# - Metadata JSON: totalPages: 2, totalElements: 3, number: 0, first: true
-GET http://localhost:8080/api/products?page=0&size=2&sort=price,desc
-
-### 2.3 Paging Halaman ke-2 (page=1, size=2, sort=price,desc)
-# Ekspektasi: 
-# - Item 1: Kopi Robusta (45.000)
-# - Metadata JSON: last: true
-GET http://localhost:8080/api/products?page=1&size=2&sort=price,desc
-
-### 2.4 Cari Nama dengan Paging (Kata "kopi", urut nama A-Z)
-GET http://localhost:8080/api/products/search?name=kopi&page=0&size=10&sort=name,asc
-
-### 2.5 Etalase Toko 1 dengan Paging
-GET http://localhost:8080/api/users/1/products?page=0&size=5
+### 2.3 Lihat Hasil Katalog (Paging)
+GET http://localhost:8080/api/products?page=0&size=10

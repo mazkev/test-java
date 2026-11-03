@@ -7,6 +7,11 @@ import com.belajar.repository.UserRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 
 import java.util.List;
 
@@ -18,13 +23,26 @@ public class ProductController {
     private final UserRepository userRepository;
 
     public record CreateProductRequest(
-        String name, 
-        String description, 
-        Double price, 
-        Integer stock, 
-        String category, 
-        Long sellerId
+    @NotBlank(message = "Nama produk tidak boleh kosong!")
+    String name,
+
+    String description,
+
+    @NotNull(message = "Harga produk wajib diisi!")
+    @Positive(message = "Harga produk harus lebih besar dari 0!")
+    Double price,
+
+    @NotNull(message = "Stok produk wajib diisi!")
+    @Min(value = 0, message = "Stok produk tidak boleh bernilai negatif!")
+    Integer stock,
+
+    @NotBlank(message = "Kategori produk tidak boleh kosong!")
+    String category,
+
+    @NotNull(message = "Seller ID wajib diisi!")
+    Long sellerId
     ) {}
+
 
     public ProductController(ProductRepository productRepository, UserRepository userRepository) {
         this.productRepository = productRepository;
@@ -46,7 +64,7 @@ public class ProductController {
 
     // Upload produk baru milik Toko tertentu
     @PostMapping
-    public ResponseEntity<Product> createProduct(@RequestBody CreateProductRequest request) {
+    public ResponseEntity<Product> createProduct(@Valid @RequestBody CreateProductRequest request) {
         var seller = userRepository.findById(request.sellerId())
                 .orElseThrow(() -> new IllegalArgumentException("Seller dengan ID " + request.sellerId() + " tidak ditemukan!"));
 

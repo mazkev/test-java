@@ -33,4 +33,22 @@ public class GlobalExceptionHandler {
             "message", e.getMessage()
         ));
     }
+        // Menangkap error validasi otomatis (@NotBlank, @Positive, @Email, @Min, dll)
+    @ExceptionHandler(org.springframework.web.bind.MethodArgumentNotValidException.class)
+    public ResponseEntity<?> handleValidationErrors(org.springframework.web.bind.MethodArgumentNotValidException e) {
+        java.util.Map<String, String> errors = new java.util.HashMap<>();
+        
+        // Kumpulkan semua field yang salah beserta pesan errornya
+        for (var fieldError : e.getBindingResult().getFieldErrors()) {
+            errors.put(fieldError.getField(), fieldError.getDefaultMessage());
+        }
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(java.util.Map.of(
+            "timestamp", LocalDateTime.now().toString(),
+            "status", 400,
+            "error", "Validation Failed",
+            "errors", errors
+        ));
+    }
+
 }
