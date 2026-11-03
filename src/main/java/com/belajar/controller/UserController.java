@@ -49,11 +49,12 @@ public class UserController {
     // 3. [GET] Melihat etalase toko (Semua produk yang dijual oleh toko tertentu)
     // GET /api/users/1/products
     @GetMapping("/{id}/products")
-    public List<Product> getProductsBySeller(@PathVariable Long id) {
-        // Cek apakah usernya ada
+    public org.springframework.data.domain.Page<Product> getProductsBySeller(
+            @PathVariable Long id, 
+            org.springframework.data.domain.Pageable pageable) {
+        
         userRepository.findById(id).orElseThrow(() -> 
             new IllegalArgumentException("User dengan ID " + id + " tidak ditemukan!"));
-
-        return productRepository.findBySellerId(id);
+        return productRepository.findBySellerId(id, pageable);
     }
 }

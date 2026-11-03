@@ -32,8 +32,9 @@ public class ProductController {
     }
 
     @GetMapping
-    public List<Product> getAllProducts() {
-        return productRepository.findAll();
+    public org.springframework.data.domain.Page<Product> getAllProducts(
+            org.springframework.data.domain.Pageable pageable) {
+        return productRepository.findAll(pageable);
     }
 
     @GetMapping("/{id}")
@@ -88,12 +89,17 @@ public class ProductController {
     }
 
     @GetMapping("/search")
-    public List<Product> searchByName(@RequestParam String name) {
-        return productRepository.findByNameContainingIgnoreCase(name);
+    public org.springframework.data.domain.Page<Product> searchByName(
+            @RequestParam String name, 
+            org.springframework.data.domain.Pageable pageable) {
+        return productRepository.findByNameContainingIgnoreCase(name, pageable);
     }
 
     @GetMapping("/category/{category}")
-    public List<Product> getByCategory(@PathVariable String category) {
-        return productRepository.findByCategory(category);
+    public org.springframework.data.domain.Page<Product> getByCategory(
+            @PathVariable String category, 
+            org.springframework.data.domain.Pageable pageable) {
+        return productRepository.findByCategory(category, pageable);
     }
+
 }
