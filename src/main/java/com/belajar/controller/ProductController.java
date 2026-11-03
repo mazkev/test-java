@@ -37,10 +37,7 @@ public class ProductController {
     Integer stock,
 
     @NotBlank(message = "Kategori produk tidak boleh kosong!")
-    String category,
-
-    @NotNull(message = "Seller ID wajib diisi!")
-    Long sellerId
+    String category
     ) {}
 
 
@@ -64,26 +61,27 @@ public class ProductController {
 
     // Upload produk baru milik Toko tertentu
     @PostMapping
-    public ResponseEntity<Product> createProduct(@Valid @RequestBody CreateProductRequest request) {
-        var seller = userRepository.findById(request.sellerId())
-                .orElseThrow(() -> new IllegalArgumentException("Seller dengan ID " + request.sellerId() + " tidak ditemukan!"));
+    public ResponseEntity<Product> createProduct(
+        @Valid @RequestBody CreateProductRequest request,
+        org.springframework.security.core.Authentication authentication) {
+    
+    // Ambil email toko yang sedang login dari Token JWT
+    String sellerEmail = authentication.getName();
+    var seller = userRepository.findByEmail(sellerEmail)
+            .orElseThrow(() -> new IllegalArgumentException("Toko tidak ditemukan!"));
 
-        // Validasi: Pembeli biasa tidak boleh upload produk
-        if (seller.getRole() != Role.SELLER) {
-            throw new IllegalStateException("Hanya akun dengan role SELLER yang bisa menjual produk!");
-        }
+    Product product = new Product(
+        request.name(), 
+        request.description(), 
+        request.price(), 
+        request.stock(), 
+        request.category()
+    );
+    product.setSeller(seller); // Otomatis mengikat ke toko yang memegang token!
 
-        Product product = new Product(
-            request.name(), 
-            request.description(), 
-            request.price(), 
-            request.stock(), 
-            request.category()
-        );
-        product.setSeller(seller);
-
-        return new ResponseEntity<>(productRepository.save(product), HttpStatus.CREATED);
+    return new ResponseEntity<>(productRepository.save(product), HttpStatus.CREATED);
     }
+
 
     @PutMapping("/{id}")
     public ResponseEntity<Product> updateProduct(@PathVariable Long id, @RequestBody Product request) {
