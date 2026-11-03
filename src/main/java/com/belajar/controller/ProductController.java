@@ -12,6 +12,9 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+
 
 import java.util.List;
 
@@ -52,12 +55,16 @@ public class ProductController {
         return productRepository.findAll(pageable);
     }
 
+        // Mengambil detail produk: otomatis disimpan ke RAM Cache
     @GetMapping("/{id}")
+    @Cacheable(value = "products", key = "#id")
     public ResponseEntity<Product> getProductById(@PathVariable Long id) {
+        System.out.println(">>> [LOG QUERY SQL] Mengambil produk ID " + id + " dari Database SQL...");
         return productRepository.findById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
+
 
     // Upload produk baru milik Toko tertentu
     @PostMapping
@@ -84,6 +91,7 @@ public class ProductController {
 
 
     @PutMapping("/{id}")
+    @CacheEvict(value = "products", key = "#id")
     public ResponseEntity<Product> updateProduct(@PathVariable Long id, @RequestBody Product request) {
         return productRepository.findById(id).map(existing -> {
             existing.setName(request.getName());
@@ -96,6 +104,7 @@ public class ProductController {
     }
 
     @DeleteMapping("/{id}")
+    @CacheEvict(value = "products", key = "#id")
     public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {
         if (productRepository.existsById(id)) {
             productRepository.deleteById(id);

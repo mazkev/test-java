@@ -78,3 +78,36 @@ Authorization: Bearer <TEMPELKAN_TOKEN_SELLER_DARI_STEP_1.3_DISINI>
 
 ### 2.3 Lihat Katalog Produk (Publik)
 GET http://localhost:8080/api/products?page=0&size=10
+
+
+### ========================================================
+### 3. UJI COBA CACHING (@Cacheable & @CacheEvict)
+### ========================================================
+
+### 3.1 Request Pertama: Ambil Detail Produk ID 1 (Cache MISS)
+# Di terminal console server akan muncul log:
+# ">>> [LOG QUERY SQL] Mengambil produk ID 1 dari Database SQL..."
+GET http://localhost:8080/api/products/1
+
+### 3.2 Request Kedua: Ambil Detail Produk ID 1 LAGI (Cache HIT)
+# Perhatikan terminal console server:
+# TIDAK ADA log query SQL sama sekali! Respon diambil kilat dari RAM Cache.
+GET http://localhost:8080/api/products/1
+
+### 3.3 Update Produk ID 1 (Cache EVICT / Hapus Cache)
+# Begitu produk diupdate, cache ID 1 otomatis dibersihkan
+PUT http://localhost:8080/api/products/1
+Content-Type: application/json
+
+{
+  "name": "Kopi Gayo Arabika Premium (Updated)",
+  "description": "Biji kopi sangrai kualitas terbaik 250g",
+  "price": 90000.0,
+  "stock": 45,
+  "category": "Minuman"
+}
+
+### 3.4 Request Ketiga setelah Update: Ambil Detail Produk ID 1 Lagi (Cache MISS baru)
+# Di terminal console server log query SQL AKAN MUNCUL KEMBALI mengambil data terbaru!
+GET http://localhost:8080/api/products/1
+
