@@ -1,7 +1,49 @@
-### 1. GET Semua Produk
-GET http://localhost:8080/api/products
+### ========================================================
+### 1. MANAJEMEN USER & TOKO (PENJUAL & PEMBELI)
+### ========================================================
 
-### 2. POST Tambah Produk (Kopi Gayo, Stok: 50, Harga: 85000)
+### A. Buka Toko 1: Toko Kopi Nusantara (Role: SELLER)
+POST http://localhost:8080/api/users
+Content-Type: application/json
+
+{
+  "name": "Toko Kopi Nusantara",
+  "email": "kopinusantara@mail.com",
+  "role": "SELLER"
+}
+
+### B. Buka Toko 2: Toko Sepatu Original (Role: SELLER)
+POST http://localhost:8080/api/users
+Content-Type: application/json
+
+{
+  "name": "Toko Sepatu Original",
+  "email": "sepatuori@mail.com",
+  "role": "SELLER"
+}
+
+### C. Daftar Akun Pembeli: Budi Santoso (Role: BUYER)
+POST http://localhost:8080/api/users
+Content-Type: application/json
+
+{
+  "name": "Budi Santoso",
+  "email": "budi@mail.com",
+  "role": "BUYER"
+}
+
+### D. Lihat Semua User (Daftar Pengguna Marketplace)
+GET http://localhost:8080/api/users
+
+### E. Lihat Hanya Penjual / Toko Saja (?role=SELLER)
+GET http://localhost:8080/api/users?role=SELLER
+
+
+### ========================================================
+### 2. PRODUK & RELASI TOKO
+### ========================================================
+
+### A. Toko 1 Upload Produk: Kopi Gayo (sellerId: 1)
 POST http://localhost:8080/api/products
 Content-Type: application/json
 
@@ -10,27 +52,58 @@ Content-Type: application/json
   "description": "Biji kopi sangrai premium 250g",
   "price": 85000.0,
   "stock": 50,
-  "category": "Minuman"
+  "category": "Minuman",
+  "sellerId": 1
 }
 
+### B. Toko 2 Upload Produk: Sepatu Nike (sellerId: 2)
+POST http://localhost:8080/api/products
+Content-Type: application/json
+
+{
+  "name": "Sepatu Lari Nike Pegasus",
+  "description": "Ukuran 42 warna hitam sporty",
+  "price": 850000.0,
+  "stock": 15,
+  "category": "Sepatu",
+  "sellerId": 2
+}
+
+### C. VALIDASI GAGAL: Pembeli (ID: 3) Coba Upload Barang
+# Ekspektasi: 400 Bad Request ("Hanya akun dengan role SELLER yang bisa menjual produk!")
+POST http://localhost:8080/api/products
+Content-Type: application/json
+
+{
+  "name": "Barang Ilegal",
+  "description": "Coba upload",
+  "price": 10000.0,
+  "stock": 1,
+  "category": "Umum",
+  "sellerId": 3
+}
+
+### D. Lihat Semua Produk (Sekarang berisi informasi Toko Penjualnya!)
+GET http://localhost:8080/api/products
+
+### E. Lihat Etalase Toko 1 Saja (Semua barang milik Toko Kopi Nusantara)
+GET http://localhost:8080/api/users/1/products
+
+
 ### ========================================================
-### FITUR TRANSAKSI & SIKLUS ORDER (MARKETPLACE)
+### 3. CHECKOUT & TRANSAKSI
 ### ========================================================
 
-### 3. CHECKOUT: Beli 5 Kopi Gayo (ID: 1, Qty: 5)
-# Status awal: PENDING, Total: 425.000, Sisa Stok Kopi: 50 -> 45
+### A. Checkout: Beli 2 Kopi Gayo (ID: 1, Qty: 2)
 POST http://localhost:8080/api/orders
 Content-Type: application/json
 
 {
   "productId": 1,
-  "quantity": 5
+  "quantity": 2
 }
 
-### 4. Cek Sisa Stok Kopi (Harusnya tinggal 45)
-GET http://localhost:8080/api/products/1
-
-### 5. UPDATE STATUS: Pembeli Melakukan Pembayaran (PAID)
+### B. Update Status Order Jadi PAID
 PUT http://localhost:8080/api/orders/1/status
 Content-Type: application/json
 
@@ -38,46 +111,5 @@ Content-Type: application/json
   "status": "PAID"
 }
 
-### 6. UPDATE STATUS: Penjual Mengirim Barang (SHIPPED)
-PUT http://localhost:8080/api/orders/1/status
-Content-Type: application/json
-
-{
-  "status": "SHIPPED"
-}
-
-### 7. UPDATE STATUS: Pembeli Konfirmasi Barang Diterima (DELIVERED)
-PUT http://localhost:8080/api/orders/1/status
-Content-Type: application/json
-
-{
-  "status": "DELIVERED"
-}
-
-### ========================================================
-### UJI COBA PEMBATALAN ORDER (RESTOCK OTOMATIS)
-### ========================================================
-
-### 8. CHECKOUT BARU: Beli 10 Kopi Gayo (Sisa Stok: 45 -> 35)
-POST http://localhost:8080/api/orders
-Content-Type: application/json
-
-{
-  "productId": 1,
-  "quantity": 10
-}
-
-### 9. BATALKAN ORDER ID 2: Ubah status jadi CANCELLED
-# Ekspektasi: Order dibatalkan, dan 10 kopi otomatis dikembalikan ke stok (35 -> 45)
-PUT http://localhost:8080/api/orders/2/status
-Content-Type: application/json
-
-{
-  "status": "CANCELLED"
-}
-
-### 10. Cek Stok Kopi Kembali Pulih Menjadi 45!
-GET http://localhost:8080/api/products/1
-
-### 11. Cek Seluruh Riwayat Orders
+### C. Cek Semua Riwayat Pesanan
 GET http://localhost:8080/api/orders

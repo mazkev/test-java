@@ -16,6 +16,10 @@ public class Product {
     private Integer stock;
     private String category;
 
+    @ManyToOne
+    @JoinColumn(name = "seller_id")
+    private User seller;
+
     // Constructor kosong (Wajib untuk JPA)
     public Product() {}
 
@@ -46,4 +50,8 @@ public class Product {
 
     public String getCategory() { return category; }
     public void setCategory(String category) { this.category = category; }
+
+    public User getSeller() { return seller; }
+    public void setSeller(User seller) { this.seller = seller; }
+
 }

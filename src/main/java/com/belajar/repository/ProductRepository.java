@@ -16,4 +16,8 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     // 2. Cari berdasarkan potongan nama (tidak sensitif huruf besar/kecil)
     // SQL: SELECT * FROM products WHERE LOWER(name) LIKE '%?%'
     List<Product> findByNameContainingIgnoreCase(String name);
+
+        // Cari semua barang milik toko tertentu (misal toko ID 1)
+    List<Product> findBySellerId(Long sellerId);
+
 }
