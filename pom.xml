@@ -43,13 +43,15 @@
             <artifactId>h2</artifactId>
             <scope>runtime</scope>
         </dependency>
-                <!-- Driver PostgreSQL untuk Database Produksi -->
+
+        <!-- Driver PostgreSQL untuk Database Produksi -->
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
             <scope>runtime</scope>
         </dependency>
-                <!-- 4. Validasi Input Otomatis -->
+
+        <!-- 4. Validasi Input Otomatis -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-validation</artifactId>
@@ -61,7 +63,8 @@
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
             <version>2.6.0</version>
         </dependency>
-                <!-- 6. Spring Security (Autentikasi & Otorisasi) -->
+
+        <!-- 6. Spring Security (Autentikasi & Otorisasi) -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
@@ -85,23 +88,30 @@
             <version>0.12.6</version>
             <scope>runtime</scope>
         </dependency>
-                <!-- 8. Database Migration Tool (Flyway) -->
+
+        <!-- 8. Database Migration Tool (Flyway) -->
         <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-core</artifactId>
         </dependency>
-                <!-- 9. High-Performance Caching -->
+        <!-- Modul Pendukung PostgreSQL untuk Flyway 10+ -->
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-database-postgresql</artifactId>
+        </dependency>
+
+        <!-- 9. High-Performance Caching -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-cache</artifactId>
         </dependency>
-                <!-- 10. Production Observability & Health Check (Actuator) -->
+
+        <!-- 10. Production Observability & Health Check (Actuator) -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
     </dependencies>
-
 
     <!-- 5. PLUGIN: Agar bisa dijalankan dengan perintah spring-boot:run -->
     <build>
