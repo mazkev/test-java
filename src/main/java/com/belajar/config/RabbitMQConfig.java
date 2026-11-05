@@ -1,6 +1,8 @@
 package com.belajar.config;
 
 import org.springframework.amqp.core.*;
+import org.springframework.amqp.rabbit.connection.ConnectionFactory;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.context.annotation.Bean;
@@ -29,9 +31,17 @@ public class RabbitMQConfig {
         return BindingBuilder.bind(orderInvoiceQueue).to(orderExchange).with(ROUTING_KEY);
     }
 
-    // Mengubah payload objek Java otomatis menjadi JSON saat dikirim ke RabbitMQ
+    // Converter otomatis objek Java <-> JSON
     @Bean
     public MessageConverter jsonMessageConverter() {
         return new Jackson2JsonMessageConverter();
+    }
+
+    // Pasang converter ke RabbitTemplate pengirim
+    @Bean
+    public RabbitTemplate rabbitTemplate(ConnectionFactory connectionFactory) {
+        RabbitTemplate template = new RabbitTemplate(connectionFactory);
+        template.setMessageConverter(jsonMessageConverter());
+        return template;
     }
 }

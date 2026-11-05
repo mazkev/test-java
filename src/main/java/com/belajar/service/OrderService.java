@@ -1,6 +1,7 @@
 package com.belajar.service;
 
 import com.belajar.event.OrderCreatedEvent;
+import com.belajar.event.OrderMessageDto;
 import com.belajar.model.Order;
 import com.belajar.model.OrderItem;
 import com.belajar.model.OrderStatus;
@@ -80,7 +81,14 @@ public class OrderService {
         Order savedOrder = orderRepository.save(order);
 
         // 4. Publikasikan pesan ke antrean terdistribusi RabbitMQ (Durable / Tidak akan hilang)
-        rabbitTemplate.convertAndSend(RabbitMQConfig.EXCHANGE_NAME, RabbitMQConfig.ROUTING_KEY, savedOrder.getId());
+        OrderMessageDto message = new OrderMessageDto(
+                savedOrder.getId(),
+                savedOrder.getBuyer().getName(),
+                savedOrder.getBuyer().getEmail(),
+                savedOrder.getTotalAmount(),
+                savedOrder.getOrderDate()
+        );
+        rabbitTemplate.convertAndSend(RabbitMQConfig.EXCHANGE_NAME, RabbitMQConfig.ROUTING_KEY, message);
 
         // 5. Tetap publikasikan event in-memory Spring untuk listener lokal
         eventPublisher.publishEvent(new OrderCreatedEvent(savedOrder));
