@@ -38,7 +38,15 @@ services:
       RABBITMQ_DEFAULT_USER: guest
       RABBITMQ_DEFAULT_PASS: guest
 
-  # 4. Aplikasi Backend Java Spring Boot
+  # 4. Zipkin Distributed Tracing Server & UI
+  zipkin:
+    image: openzipkin/zipkin:latest
+    container_name: marketplace-zipkin
+    restart: always
+    ports:
+      - "9411:9411"
+
+  # 5. Aplikasi Backend Java Spring Boot
   app:
     build:
       context: .
@@ -54,6 +62,8 @@ services:
         condition: service_started
       rabbitmq:
         condition: service_started
+      zipkin:
+        condition: service_started
     environment:
       SPRING_PROFILES_ACTIVE: prod
       SPRING_DATASOURCE_URL: jdbc:oracle:thin:@//oracle-db:1521/FREEPDB1
@@ -66,6 +76,7 @@ services:
       SPRING_RABBITMQ_PORT: 5672
       SPRING_RABBITMQ_USERNAME: guest
       SPRING_RABBITMQ_PASSWORD: guest
+      MANAGEMENT_ZIPKIN_TRACING_ENDPOINT: http://zipkin:9411/api/v2/spans
 
 volumes:
   oracle_data:

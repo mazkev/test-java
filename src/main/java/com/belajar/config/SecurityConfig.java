@@ -49,8 +49,8 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.PUT, "/api/products/**").hasRole("SELLER")
                 .requestMatchers(HttpMethod.DELETE, "/api/products/**").hasRole("SELLER")
                 
-                // Checkout pesanan WAJIB login dengan role BUYER!
-                .requestMatchers(HttpMethod.POST, "/api/orders").hasRole("BUYER")
+                // Checkout & Pembayaran pesanan WAJIB login dengan role BUYER!
+                .requestMatchers(HttpMethod.POST, "/api/orders/**").hasRole("BUYER")
                 
                 .anyRequest().authenticated()
             )

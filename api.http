@@ -175,3 +175,66 @@ GET http://localhost:8080/actuator/metrics
 # Request ke-6     : Status 429 Too Many Requests (Ditolak otomatis!)
 # Setelah menunggu 10 detik, klik lagi -> Status 200 OK kembali normal!
 GET http://localhost:8080/api/products
+
+
+### ========================================================
+### 7. LEVEL 4: RESILIENCY, TRACING, CIRCUIT BREAKER & DLQ
+### ========================================================
+
+### 7.1 Registrasi Buyer Khusus Pengujian DLQ (Email mengandung kata 'fail')
+POST http://localhost:8080/api/auth/register
+Content-Type: application/json
+
+{
+  "name": "Budi Failure Tester",
+  "email": "budi-fail@mail.com",
+  "password": "passwordFail123",
+  "role": "BUYER"
+}
+
+### 7.2 Login Buyer Failure Tester (Ambil Token JWT)
+# @name loginBuyerFail
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "budi-fail@mail.com",
+  "password": "passwordFail123"
+}
+
+### 7.3 Uji Coba Fase 15: Checkout yang Memperagakan Retry 3x & Dead Letter Queue (DLQ)
+# Ekspektasi: 
+# 1. API mengembalikan 201 Created secara asinkron.
+# 2. Worker RabbitMQ mencoba 3x memproses pesan (terlihat di log kontainer).
+# 3. Setelah 3x gagal, pesan otomatis dipindahkan ke 'order.invoice.dlq' (Zero Data Loss!).
+POST http://localhost:8080/api/orders
+Authorization: Bearer {{loginBuyerFail.response.body.token}}
+Content-Type: application/json
+
+{
+  "items": [
+    {
+      "productId": 1,
+      "quantity": 1
+    }
+  ]
+}
+
+### 7.4 Uji Coba Fase 16 & 18: Request dengan Correlation ID & Trace ID
+# Perhatikan Header Respon: Terdapat 'X-Correlation-ID' dan 'X-Trace-Id'
+# Buka Zipkin Web Dashboard di: http://localhost:9411
+GET http://localhost:8080/api/products/1
+X-Correlation-ID: my-custom-correlation-12345
+
+### 7.5 Uji Coba Fase 17: Payment Gateway Normal (Circuit Breaker CLOSED)
+# Ekspektasi: 200 OK dengan success: true dan transactionId terbit
+POST http://localhost:8080/api/orders/1/pay?simulateFailure=false
+Authorization: Bearer {{loginBuyer.response.body.token}}
+
+### 7.6 Uji Coba Fase 17: Payment Gateway Timeout (Circuit Breaker Fallback)
+# Ekspektasi: 200 OK dengan success: false, fallback otomatis aktif dialihkan ke metode Manual Transfer!
+POST http://localhost:8080/api/orders/1/pay?simulateFailure=true
+Authorization: Bearer {{loginBuyer.response.body.token}}
+
+### 7.7 Cek Status Health & Metrik Circuit Breaker di Actuator
+GET http://localhost:8080/actuator/health

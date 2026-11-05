@@ -3,6 +3,7 @@ package com.belajar.controller;
 import com.belajar.model.Order;
 import com.belajar.model.OrderStatus;
 import com.belajar.service.OrderService;
+import com.belajar.service.PaymentGatewayService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -15,12 +16,14 @@ import java.util.List;
 public class OrderController {
 
     private final OrderService orderService;
+    private final PaymentGatewayService paymentGatewayService;
 
     public record CheckoutRequest(List<OrderService.CartItemDto> items) {}
     public record UpdateStatusRequest(OrderStatus status) {}
 
-    public OrderController(OrderService orderService) {
+    public OrderController(OrderService orderService, PaymentGatewayService paymentGatewayService) {
         this.orderService = orderService;
+        this.paymentGatewayService = paymentGatewayService;
     }
 
     @GetMapping
@@ -42,5 +45,16 @@ public class OrderController {
     public ResponseEntity<Order> updateStatus(@PathVariable Long id, @RequestBody UpdateStatusRequest request) {
         Order order = orderService.updateStatus(id, request.status());
         return ResponseEntity.ok(order);
+    }
+
+    /**
+     * Fase 17: Uji Coba Circuit Breaker
+     */
+    @PostMapping("/{id}/pay")
+    public ResponseEntity<PaymentGatewayService.PaymentResult> payOrder(
+            @PathVariable Long id,
+            @RequestParam(defaultValue = "false") boolean simulateFailure) {
+        PaymentGatewayService.PaymentResult result = paymentGatewayService.processPayment(id, 170000.0, simulateFailure);
+        return ResponseEntity.ok(result);
     }
 }
