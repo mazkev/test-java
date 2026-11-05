@@ -15,7 +15,6 @@ import jakarta.validation.constraints.Positive;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 
-
 import java.util.List;
 
 @RestController
@@ -43,7 +42,6 @@ public class ProductController {
     String category
     ) {}
 
-
     public ProductController(ProductRepository productRepository, UserRepository userRepository) {
         this.productRepository = productRepository;
         this.userRepository = userRepository;
@@ -55,16 +53,14 @@ public class ProductController {
         return productRepository.findAll(pageable);
     }
 
-        // Mengambil detail produk: otomatis disimpan ke RAM Cache
+    // Mengambil detail produk: otomatis disimpan ke Redis Distributed Cache
     @GetMapping("/{id}")
     @Cacheable(value = "products", key = "#id")
-    public ResponseEntity<Product> getProductById(@PathVariable Long id) {
+    public Product getProductById(@PathVariable Long id) {
         System.out.println(">>> [LOG QUERY SQL] Mengambil produk ID " + id + " dari Database SQL...");
         return productRepository.findById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+                .orElseThrow(() -> new IllegalArgumentException("Produk dengan ID " + id + " tidak ditemukan!"));
     }
-
 
     // Upload produk baru milik Toko tertentu
     @PostMapping
@@ -88,7 +84,6 @@ public class ProductController {
 
     return new ResponseEntity<>(productRepository.save(product), HttpStatus.CREATED);
     }
-
 
     @PutMapping("/{id}")
     @CacheEvict(value = "products", key = "#id")
@@ -126,5 +121,4 @@ public class ProductController {
             org.springframework.data.domain.Pageable pageable) {
         return productRepository.findByCategory(category, pageable);
     }
-
 }

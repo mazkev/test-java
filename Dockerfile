@@ -1,20 +1,16 @@
 # ========================================================
-# STAGE 1: BUILDER (Kompilasi kode sumber menjadi .jar)
+# STAGE 1: BUILDER (Maven 3.9 + JDK 21 Alpine)
 # ========================================================
-FROM eclipse-temurin:21-jdk-alpine AS builder
+FROM maven:3.9.9-eclipse-temurin-21-alpine AS builder
 WORKDIR /app
 
-# Salin Maven Wrapper dan pom.xml terlebih dahulu untuk caching dependensi
-COPY .mvn/ .mvn/
-COPY mvnw pom.xml ./
-RUN chmod +x mvnw
-
-# Unduh dependensi Maven
-RUN ./mvnw dependency:go-offline -B
+# Salin pom.xml dan unduh dependensi
+COPY pom.xml ./
+RUN mvn dependency:resolve -B
 
 # Salin seluruh kode sumber dan compile menjadi file .jar
 COPY src ./src
-RUN ./mvnw clean package -DskipTests
+RUN mvn clean package -DskipTests
 
 # ========================================================
 # STAGE 2: RUNNER (Image produksi super ringan ~150MB)

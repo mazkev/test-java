@@ -2,10 +2,12 @@ package com.belajar.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import java.io.Serializable;
 
 @Entity
 @Table(name = "users")
-public class User {
+public class User implements Serializable {
+    private static final long serialVersionUID = 1L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -18,7 +20,6 @@ public class User {
 
     @JsonIgnore // Rahasia: Password tidak akan pernah bocor ke respon JSON
     private String password;
-
 
     @Enumerated(EnumType.STRING)
     private Role role;

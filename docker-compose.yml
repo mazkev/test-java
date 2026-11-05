@@ -18,7 +18,15 @@ services:
       timeout: 5s
       retries: 5
 
-  # 2. Aplikasi Backend Java Spring Boot
+  # 2. Redis In-Memory Distributed Cache
+  redis:
+    image: redis:7-alpine
+    container_name: marketplace-redis
+    restart: always
+    ports:
+      - "6379:6379"
+
+  # 3. Aplikasi Backend Java Spring Boot
   app:
     build:
       context: .
@@ -29,13 +37,17 @@ services:
       - "8080:8080"
     depends_on:
       postgres-db:
-        condition: service_healthy # Menunggu database siap 100% sebelum Java menyala
+        condition: service_healthy
+      redis:
+        condition: service_started
     environment:
       SPRING_PROFILES_ACTIVE: prod
-      # Di dalam jaringan Docker, nama host database adalah 'postgres-db' (bukan localhost)
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-db:5432/marketplacedb
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: postgrespassword123
+      # Konfigurasi Host Redis di dalam jaringan Docker
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: 6379
 
 volumes:
   postgres_data:
