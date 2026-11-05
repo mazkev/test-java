@@ -165,3 +165,13 @@ GET http://localhost:8080/actuator/metrics
 
 
 
+
+### ========================================================
+### 6. UJI COBA RATE LIMITING & ANTI-SPAM (@RateLimitingFilter)
+### ========================================================
+
+### 6.1 Uji Coba Spamming (Klik 'Send Request' ini 6 kali berturut-turut dengan cepat!)
+# Request 1 s/d 5 : Status 200 OK
+# Request ke-6     : Status 429 Too Many Requests (Ditolak otomatis!)
+# Setelah menunggu 10 detik, klik lagi -> Status 200 OK kembali normal!
+GET http://localhost:8080/api/products
