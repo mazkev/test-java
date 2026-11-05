@@ -1,4 +1,5 @@
 services:
+  # 1. Database PostgreSQL
   postgres-db:
     image: postgres:16-alpine
     container_name: marketplace-postgres
@@ -11,6 +12,30 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d marketplacedb"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # 2. Aplikasi Backend Java Spring Boot
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: marketplace-backend
+    restart: always
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres-db:
+        condition: service_healthy # Menunggu database siap 100% sebelum Java menyala
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      # Di dalam jaringan Docker, nama host database adalah 'postgres-db' (bukan localhost)
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-db:5432/marketplacedb
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgrespassword123
 
 volumes:
   postgres_data:
