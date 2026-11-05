@@ -122,6 +122,11 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
+                <!-- 11. Distributed Message Broker (RabbitMQ / Spring AMQP) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-amqp</artifactId>
+        </dependency>
     </dependencies>
 
     <!-- 5. PLUGIN: Agar bisa dijalankan dengan perintah spring-boot:run -->

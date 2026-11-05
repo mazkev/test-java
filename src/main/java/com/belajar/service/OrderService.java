@@ -11,6 +11,8 @@ import com.belajar.repository.UserRepository;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import com.belajar.config.RabbitMQConfig;
 
 import java.util.List;
 
@@ -21,17 +23,20 @@ public class OrderService {
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
     private final ApplicationEventPublisher eventPublisher;
+    private final RabbitTemplate rabbitTemplate;
 
     public record CartItemDto(Long productId, Integer quantity) {}
 
     public OrderService(OrderRepository orderRepository, 
                         ProductRepository productRepository, 
                         UserRepository userRepository,
-                        ApplicationEventPublisher eventPublisher) {
+                        ApplicationEventPublisher eventPublisher,
+                        RabbitTemplate rabbitTemplate) {
         this.orderRepository = orderRepository;
         this.productRepository = productRepository;
         this.userRepository = userRepository;
         this.eventPublisher = eventPublisher;
+        this.rabbitTemplate = rabbitTemplate;
     }
 
     public List<Order> getAllOrders() {
@@ -74,7 +79,10 @@ public class OrderService {
         // 3. Simpan pesanan ke database
         Order savedOrder = orderRepository.save(order);
 
-        // 4. Melempar event ke background worker (Asynchronous / Non-blocking)
+        // 4. Publikasikan pesan ke antrean terdistribusi RabbitMQ (Durable / Tidak akan hilang)
+        rabbitTemplate.convertAndSend(RabbitMQConfig.EXCHANGE_NAME, RabbitMQConfig.ROUTING_KEY, savedOrder.getId());
+
+        // 5. Tetap publikasikan event in-memory Spring untuk listener lokal
         eventPublisher.publishEvent(new OrderCreatedEvent(savedOrder));
 
         return savedOrder;

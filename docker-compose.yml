@@ -26,7 +26,19 @@ services:
     ports:
       - "6379:6379"
 
-  # 3. Aplikasi Backend Java Spring Boot
+  # 3. RabbitMQ Message Broker & Management UI
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: marketplace-rabbitmq
+    restart: always
+    ports:
+      - "5672:5672"     # Port AMQP untuk aplikasi Java
+      - "15672:15672"   # Port Web Dashboard UI di browser
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+
+  # 4. Aplikasi Backend Java Spring Boot
   app:
     build:
       context: .
@@ -40,6 +52,8 @@ services:
         condition: service_healthy
       redis:
         condition: service_started
+      rabbitmq:
+        condition: service_started
     environment:
       SPRING_PROFILES_ACTIVE: prod
       SPRING_DATASOURCE_URL: jdbc:oracle:thin:@//oracle-db:1521/FREEPDB1
@@ -48,6 +62,10 @@ services:
       SPRING_DATASOURCE_DRIVER_CLASS_NAME: oracle.jdbc.OracleDriver
       SPRING_DATA_REDIS_HOST: redis
       SPRING_DATA_REDIS_PORT: 6379
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: guest
+      SPRING_RABBITMQ_PASSWORD: guest
 
 volumes:
   oracle_data:
