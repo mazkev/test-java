@@ -44,11 +44,17 @@
             <scope>runtime</scope>
         </dependency>
 
-        <!-- Driver PostgreSQL untuk Database Produksi -->
+               <!-- Driver Resmi Oracle Database (ojdbc11 untuk Java 21) -->
         <dependency>
-            <groupId>org.postgresql</groupId>
-            <artifactId>postgresql</artifactId>
+            <groupId>com.oracle.database.jdbc</groupId>
+            <artifactId>ojdbc11</artifactId>
             <scope>runtime</scope>
+        </dependency>
+
+        <!-- Modul Pendukung Oracle untuk Flyway -->
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-database-oracle</artifactId>
         </dependency>
 
         <!-- 4. Validasi Input Otomatis -->

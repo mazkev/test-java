@@ -1,22 +1,22 @@
 services:
-  # 1. Database PostgreSQL
-  postgres-db:
-    image: postgres:16-alpine
-    container_name: marketplace-postgres
+  # 1. Oracle Database 23ai Free
+  oracle-db:
+    image: gvenzl/oracle-free:23-slim-faststart
+    container_name: marketplace-oracle
     restart: always
     environment:
-      POSTGRES_DB: marketplacedb
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgrespassword123
+      ORACLE_PASSWORD: oraclepassword123
+      APP_USER: myuser
+      APP_USER_PASSWORD: userpassword123
     ports:
-      - "5432:5432"
+      - "1521:1521"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - oracle_data:/opt/oracle/oradata
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d marketplacedb"]
-      interval: 5s
+      test: ["CMD-SHELL", "healthcheck.sh"]
+      interval: 10s
       timeout: 5s
-      retries: 5
+      retries: 10
 
   # 2. Redis In-Memory Distributed Cache
   redis:
@@ -36,18 +36,18 @@ services:
     ports:
       - "8080:8080"
     depends_on:
-      postgres-db:
+      oracle-db:
         condition: service_healthy
       redis:
         condition: service_started
     environment:
       SPRING_PROFILES_ACTIVE: prod
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-db:5432/marketplacedb
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: postgrespassword123
-      # Konfigurasi Host Redis di dalam jaringan Docker
+      SPRING_DATASOURCE_URL: jdbc:oracle:thin:@//oracle-db:1521/FREEPDB1
+      SPRING_DATASOURCE_USERNAME: myuser
+      SPRING_DATASOURCE_PASSWORD: userpassword123
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: oracle.jdbc.OracleDriver
       SPRING_DATA_REDIS_HOST: redis
       SPRING_DATA_REDIS_PORT: 6379
 
 volumes:
-  postgres_data:
+  oracle_data:
