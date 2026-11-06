@@ -41,6 +41,8 @@ class ProductControllerTest {
 
     @BeforeEach
     void setUp() {
+        // MockMvcBuilders.standaloneSetup menyiapkan lingkungan HTTP tiruan khusus untuk ProductController
+        // .setControllerAdvice(new GlobalExceptionHandler()) memasang interceptor error global kita
         mockMvc = MockMvcBuilders.standaloneSetup(productController)
                 .setControllerAdvice(new GlobalExceptionHandler())
                 .build();
@@ -50,10 +52,12 @@ class ProductControllerTest {
     }
 
     @Test
-    @DisplayName("GET /api/products/1: Mengembalikan 200 OK dan detail produk tunggal")
+    @DisplayName("Test 1: GET /api/products/1 - Sukses mengembalikan 200 OK dan detail produk")
     void getProductById_Success() throws Exception {
+        // GIVEN: Database tiruan memiliki produk ID 1
         when(productRepository.findById(1L)).thenReturn(Optional.of(mockProduct));
 
+        // WHEN & THEN: Tembak HTTP GET /api/products/1
         mockMvc.perform(get("/api/products/1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1))
@@ -63,10 +67,12 @@ class ProductControllerTest {
     }
 
     @Test
-    @DisplayName("GET /api/products/999: Mengembalikan 404 Not Found jika produk tidak ada")
+    @DisplayName("Test 2: GET /api/products/999 - Mengembalikan 404 Not Found jika produk tidak ada")
     void getProductById_NotFound() throws Exception {
+        // GIVEN: Produk ID 999 tidak ada di database
         when(productRepository.findById(999L)).thenReturn(Optional.empty());
 
+        // WHEN & THEN: Tembak HTTP GET /api/products/999
         mockMvc.perform(get("/api/products/999"))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.status").value(404))
@@ -75,9 +81,9 @@ class ProductControllerTest {
     }
 
     @Test
-    @DisplayName("POST /api/products: Ditolak dengan 400 Bad Request jika input kosong")
+    @DisplayName("Test 3: POST /api/products - Ditolak 400 Bad Request jika data body JSON kosong")
     void createProduct_FailsValidation_WhenEmptyInput() throws Exception {
-        // Request body kosong tanpa nama, harga, stok, dsb.
+        // WHEN & THEN: Kirim JSON kosong "{}" untuk menguji validasi @NotBlank, @NotNull, @Positive
         mockMvc.perform(post("/api/products")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{}"))

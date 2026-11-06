@@ -28,9 +28,11 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
+// 1. @ExtendWith(MockitoExtension.class) mengaktifkan fitur Mockito di JUnit 5
 @ExtendWith(MockitoExtension.class)
 class OrderServiceTest {
 
+    // 2. @Mock membuat objek tiruan (palsu) tanpa menyentuh Database SQL asli atau RabbitMQ
     @Mock
     private OrderRepository orderRepository;
 
@@ -46,47 +48,51 @@ class OrderServiceTest {
     @Mock
     private RabbitTemplate rabbitTemplate;
 
+    // 3. @InjectMocks membuat instance asli OrderService dan otomatis menyuntikkan semua @Mock di atas ke dalamnya
     @InjectMocks
     private OrderService orderService;
 
     private User buyer;
     private Product coffeeProduct;
 
+    // 4. @BeforeEach dijalankan ulang sebelum setiap unit test untuk mereset data awal
     @BeforeEach
     void setUp() {
         buyer = new User("Budi Pembeli", "budi@mail.com", "rahasia123", Role.BUYER);
+        
+        // Produk awal: Kopi Gayo, stok = 10
         coffeeProduct = new Product("Kopi Gayo", "Kopi Arabika 250g", 85000.0, 10, "Minuman");
         coffeeProduct.setId(1L);
     }
 
     @Test
-    @DisplayName("Checkout Sukses: Stok berkurang dan pesan RabbitMQ terkirim")
+    @DisplayName("Skenario 1: Checkout Sukses - Stok terpotong dan pesan dikirim ke RabbitMQ")
     void checkout_Success_DeductsStockAndPublishesMessage() {
-        // Arrange
+        // GIVEN (Persiapan Data & Perilaku Mock)
         when(userRepository.findByEmail("budi@mail.com")).thenReturn(Optional.of(buyer));
         when(productRepository.findById(1L)).thenReturn(Optional.of(coffeeProduct));
         when(orderRepository.save(any(Order.class))).thenAnswer(invocation -> {
             Order o = invocation.getArgument(0);
-            o.setId(100L);
+            o.setId(100L); // Simulasi ID terbit dari database
             return o;
         });
 
-        var cartItems = List.of(new OrderService.CartItemDto(1L, 2));
+        var cartItems = List.of(new OrderService.CartItemDto(1L, 2)); // Beli 2 item
 
-        // Act
+        // WHEN (Eksekusi Method Bisnis yang Diuji)
         Order createdOrder = orderService.checkout("budi@mail.com", cartItems);
 
-        // Assert
+        // THEN (Verifikasi Hasil dengan AssertJ)
         assertThat(createdOrder).isNotNull();
         assertThat(createdOrder.getId()).isEqualTo(100L);
-        assertThat(createdOrder.getTotalAmount()).isEqualTo(170000.0);
-        assertThat(coffeeProduct.getStock()).isEqualTo(8); // 10 - 2
+        assertThat(createdOrder.getTotalAmount()).isEqualTo(170000.0); // 85000 * 2
+        assertThat(coffeeProduct.getStock()).isEqualTo(8); // 10 dikurang 2 sisa 8!
 
-        // Verifikasi repository menyimpan produk baru dengan stok 8
+        // Verifikasi bahwa database benar-benar dipanggil untuk menyimpan perubahan
         verify(productRepository, times(1)).save(coffeeProduct);
         verify(orderRepository, times(1)).save(any(Order.class));
 
-        // Verifikasi RabbitMQ menerima pengiriman DTO
+        // Verifikasi bahwa RabbitMQ benar-benar menerima payload DTO
         verify(rabbitTemplate, times(1)).convertAndSend(
                 eq(RabbitMQConfig.EXCHANGE_NAME),
                 eq(RabbitMQConfig.ROUTING_KEY),
@@ -95,37 +101,36 @@ class OrderServiceTest {
     }
 
     @Test
-    @DisplayName("Checkout Gagal: Stok barang tidak mencukupi melempar IllegalStateException")
+    @DisplayName("Skenario 2: Checkout Gagal - Stok tidak mencukupi melempar IllegalStateException")
     void checkout_Fails_WhenInsufficientStock() {
-        // Arrange: Sisa stok hanya 10, pembeli minta 15
+        // GIVEN: Stok hanya 10, tapi pembeli meminta 15
         when(userRepository.findByEmail("budi@mail.com")).thenReturn(Optional.of(buyer));
         when(productRepository.findById(1L)).thenReturn(Optional.of(coffeeProduct));
 
         var cartItems = List.of(new OrderService.CartItemDto(1L, 15));
 
-        // Act & Assert
+        // WHEN & THEN: Harus melempar IllegalStateException dengan pesan error yang spesifik
         assertThatThrownBy(() -> orderService.checkout("budi@mail.com", cartItems))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("Stok tidak mencukupi");
 
-        // Verifikasi tidak ada order yang disimpan dan tidak ada event yang dipublikasi
+        // VERIFIKASI KEAMANAN: Pastikan pesanan TIDAK tersimpan dan RabbitMQ TIDAK dipanggil!
         verify(orderRepository, never()).save(any(Order.class));
         verify(rabbitTemplate, never()).convertAndSend(anyString(), anyString(), any(Object.class));
     }
 
     @Test
-    @DisplayName("Checkout Gagal: User dengan role SELLER tidak boleh checkout")
+    @DisplayName("Skenario 3: Checkout Gagal - User dengan role SELLER dilarang belanja")
     void checkout_Fails_WhenUserIsNotBuyer() {
-        // Arrange
+        // GIVEN: User ber-role SELLER
         User seller = new User("Toko Kopi", "toko@mail.com", "pass123", Role.SELLER);
         when(userRepository.findByEmail("toko@mail.com")).thenReturn(Optional.of(seller));
 
         var cartItems = List.of(new OrderService.CartItemDto(1L, 1));
 
-        // Act & Assert
+        // WHEN & THEN
         assertThatThrownBy(() -> orderService.checkout("toko@mail.com", cartItems))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("Hanya akun BUYER yang berhak");
     }
 }
-

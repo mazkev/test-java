@@ -1,5 +1,7 @@
 name: Java 21 Enterprise CI/CD Pipeline
 
+# 1. Kapan pipeline ini dipicu?
+# Setiap kali ada 'git push' atau 'pull request' ke branch 'main'
 on:
   push:
     branches: [ "main" ]
@@ -9,12 +11,14 @@ on:
 jobs:
   build-and-test:
     name: Build, Test & Containerize
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest # Menggunakan server Ubuntu terbaru di cloud GitHub
 
     steps:
+      # Langkah 1: Kloning repositori kode
       - name: 1. Checkout Repository
         uses: actions/checkout@v4
 
+      # Langkah 2: Pasang JDK 21 resmi (Eclipse Temurin) + aktifkan caching dependensi Maven
       - name: 2. Set Up JDK 21 (Eclipse Temurin)
         uses: actions/setup-java@v4
         with:
@@ -22,14 +26,18 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
+      # Langkah 3: Beri izin eksekusi script wrapper di sistem operasi Linux
       - name: 3. Grant Execute Permission for Maven Wrapper
         run: chmod +x mvnw
 
+      # Langkah 4: JALANKAN 8 TEST OTOMATIS KITA DI CLOUD!
       - name: 4. Run Automated Test Suite (JUnit 5 + Mockito + MockMvc)
         run: ./mvnw clean test
 
+      # Langkah 5: Kompilasi & kemas aplikasi menjadi production-ready JAR
       - name: 5. Build Production JAR Artifact
         run: ./mvnw clean package -DskipTests
 
+      # Langkah 6: Validasi build Docker Image agar siap dideploy ke server/Kubernetes
       - name: 6. Build Docker Image (Container Verification)
         run: docker build -t marketplace-backend:latest .
