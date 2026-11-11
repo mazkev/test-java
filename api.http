@@ -45,3 +45,13 @@ Content-Type: application/json
   "price": -50000.0,
   "stock": -10
 }
+
+### 7. Uji Coba Pagination: Minta Halaman 0, Ukuran 1 Barang per Halaman
+# Ekspektasi: Hanya muncul 1 barang, tapi ada info totalPages dan totalElements
+GET http://localhost:8080/api/products?page=0&size=1
+
+###
+
+### 8. Uji Coba Sorting: Urutkan Produk dari yang TERMAHAL ke Termurah (price,desc)
+# Ekspektasi: Kopi Gayo (85000) muncul duluan sebelum Teh Walini (25000)
+GET http://localhost:8080/api/products?sort=price,desc
