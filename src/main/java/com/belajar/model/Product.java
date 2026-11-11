@@ -1,6 +1,10 @@
 package com.belajar.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 
 @Entity
 @Table(name = "products")
@@ -10,8 +14,13 @@ public class Product {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotBlank(message = "Nama produk tidak boleh kosong!")
     private String name;
+    @NotNull(message = "Harga produk wajib diisi!")
+    @Positive(message = "Harga produk harus lebih besar dari 0!")
     private Double price;
+    @NotNull(message = "Stok produk wajib diisi!")
+    @Min(value = 0, message = "Stok produk tidak boleh bernilai negatif!")
     private Integer stock;
 
     public Product() {} // Constructor kosong wajib untuk JPA

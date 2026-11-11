@@ -34,3 +34,14 @@ Content-Type: application/json
 
 ### 5. Minta Hapus Produk ID 2 (DELETE)
 DELETE http://localhost:8080/api/products/2
+
+### 6. Uji Coba Satpam: Kirim Data Rusak (POST)
+# Ekspektasi: Ditolak 400 Bad Request dengan rincian pesan error!
+POST http://localhost:8080/api/products
+Content-Type: application/json
+
+{
+  "name": "",
+  "price": -50000.0,
+  "stock": -10
+}

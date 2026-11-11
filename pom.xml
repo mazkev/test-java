@@ -44,6 +44,11 @@
             <artifactId>h2</artifactId>
             <scope>runtime</scope>
         </dependency>
+                <!-- Satpam Validasi Input (Bean Validation) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
+        </dependency>
     </dependencies>
 
     <!-- 5. BUILD PLUGIN -->
