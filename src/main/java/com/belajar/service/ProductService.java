@@ -5,6 +5,7 @@ import com.belajar.repository.ProductRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import com.belajar.dto.CreateProductRequest;
 
 import java.util.List;
 import java.util.Optional;
@@ -27,8 +28,9 @@ public class ProductService {
         return productRepository.findById(id);
     }
 
-    public Product createProduct(Product product) {
-        return productRepository.save(product);
+    public Product createProduct(CreateProductRequest request) {
+        Product newProduct = new Product(request.name(), request.price(), request.stock());
+        return productRepository.save(newProduct);
     }
 
     public Optional<Product> updateProduct(Long id, Product updatedProduct) {

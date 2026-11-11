@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import com.belajar.dto.CreateProductRequest;
 
 import java.util.List;
 
@@ -35,8 +36,8 @@ public class ProductController {
     }
 
     @PostMapping
-    public ResponseEntity<Product> create(@Valid @RequestBody Product product) {
-        Product saved = productService.createProduct(product);
+    public ResponseEntity<Product> create(@Valid @RequestBody CreateProductRequest request) {
+        Product saved = productService.createProduct(request);
         return new ResponseEntity<>(saved, HttpStatus.CREATED);
     }
 
