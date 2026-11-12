@@ -55,3 +55,14 @@ GET http://localhost:8080/api/products?page=0&size=1
 ### 8. Uji Coba Sorting: Urutkan Produk dari yang TERMAHAL ke Termurah (price,desc)
 # Ekspektasi: Kopi Gayo (85000) muncul duluan sebelum Teh Walini (25000)
 GET http://localhost:8080/api/products?sort=price,desc
+
+### 3. Kirim Bungkusan Produk Baru (POST)
+POST http://localhost:8080/api/products
+Content-Type: application/json
+
+{
+  "name": "Kopi Susu Gula Aren",
+  "price": 18000.0,
+  "stock": 35,
+  "sellerId": 1
+}

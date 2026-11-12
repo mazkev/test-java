@@ -6,6 +6,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import com.belajar.dto.CreateProductRequest;
+import com.belajar.model.User;
+import com.belajar.repository.UserRepository;
 
 import java.util.List;
 import java.util.Optional;
@@ -14,10 +16,12 @@ import java.util.Optional;
 public class ProductService {
 
     private final ProductRepository productRepository;
+    private final UserRepository userRepository;
 
     // Dependency Injection: Spring otomatis memasang ProductRepository ke Service
-    public ProductService(ProductRepository productRepository) {
+    public ProductService(ProductRepository productRepository, UserRepository userRepository) {
         this.productRepository = productRepository;
+        this.userRepository = userRepository;
     }
 
     public Page<Product> getAllProducts(Pageable pageable) {
@@ -29,7 +33,13 @@ public class ProductService {
     }
 
     public Product createProduct(CreateProductRequest request) {
+        // Cari penjual di database berdasarkan sellerId kiriman tamu
+        User seller = userRepository.findById(request.sellerId())
+                .orElseThrow(() -> new IllegalArgumentException("Penjual dengan ID " + request.sellerId() + " tidak ditemukan!"));
+
         Product newProduct = new Product(request.name(), request.price(), request.stock());
+        newProduct.setSeller(seller); // Ikat produk ke penjualnya!
+
         return productRepository.save(newProduct);
     }
 

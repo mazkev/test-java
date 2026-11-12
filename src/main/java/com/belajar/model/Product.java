@@ -14,6 +14,10 @@ public class Product {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @ManyToOne
+    @JoinColumn(name = "seller_id") // Nama kolom foreign key di SQL
+    private User seller;
+
     @NotBlank(message = "Nama produk tidak boleh kosong!")
     private String name;
     @NotNull(message = "Harga produk wajib diisi!")
@@ -43,4 +47,7 @@ public class Product {
 
     public Integer getStock() { return stock; }
     public void setStock(Integer stock) { this.stock = stock; }
+
+    public User getSeller() { return seller; }
+    public void setSeller(User seller) { this.seller = seller; }
 }

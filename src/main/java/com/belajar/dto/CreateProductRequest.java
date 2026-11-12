@@ -15,7 +15,10 @@ public record CreateProductRequest(
 
     @NotNull(message = "Stok produk wajib diisi!")
     @Min(value = 0, message = "Stok produk tidak boleh bernilai negatif!")
-    Integer stock
+    Integer stock,
+
+    @NotNull(message = "ID Penjual (sellerId) wajib diisi!")
+    Long sellerId
 ) {
     // Dengan record: otomatis aman, tidak bisa disisipi kolom liar oleh hacker!
 }
