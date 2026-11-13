@@ -24,11 +24,10 @@ public class MyApiApplication {
             );
 
             // 2. Buat Produk yang terikat ke Toko Kopi Nusantara
-            com.belajar.model.Product p1 = new com.belajar.model.Product("Kopi Gayo Arabika", 85000.0, 20);
+            com.belajar.model.Product p1 = new com.belajar.model.Product("Kopi Gayo Arabika", 85000.0, 20, "Minuman");
             p1.setSeller(tokoKopi);
             productRepository.save(p1);
-
-            com.belajar.model.Product p2 = new com.belajar.model.Product("Teh Hitam Walini", 25000.0, 50);
+            com.belajar.model.Product p2 = new com.belajar.model.Product("Teh Hitam Walini", 25000.0, 50, "Minuman");
             p2.setSeller(tokoKopi);
             productRepository.save(p2);
         };

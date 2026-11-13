@@ -66,3 +66,13 @@ Content-Type: application/json
   "stock": 35,
   "sellerId": 1
 }
+
+### 9. Uji Coba Pencarian: Cari Produk yang Ada Kata "Gayo" (?name=Gayo)
+# Ekspektasi: Hanya Kopi Gayo yang muncul
+GET http://localhost:8080/api/products?name=Gayo
+
+###
+
+### 10. Uji Coba Filter Kategori: Cari Produk dengan Kategori "Minuman" (?category=Minuman)
+# Ekspektasi: Kopi Gayo dan Teh Walini sama-sama muncul
+GET http://localhost:8080/api/products?category=Minuman

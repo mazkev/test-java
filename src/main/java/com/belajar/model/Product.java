@@ -26,13 +26,16 @@ public class Product {
     @NotNull(message = "Stok produk wajib diisi!")
     @Min(value = 0, message = "Stok produk tidak boleh bernilai negatif!")
     private Integer stock;
+    @NotBlank(message = "Kategori produk tidak boleh kosong!")
+    private String category;
 
     public Product() {} // Constructor kosong wajib untuk JPA
 
-    public Product(String name, Double price, Integer stock) {
+    public Product(String name, Double price, Integer stock,String category) {
         this.name = name;
         this.price = price;
         this.stock = stock;
+        this.category = category;
     }
 
     // Getter dan Setter
@@ -50,4 +53,7 @@ public class Product {
 
     public User getSeller() { return seller; }
     public void setSeller(User seller) { this.seller = seller; }
+
+    public String getCategory() { return category; }
+    public void setCategory(String category) { this.category = category; }
 }

@@ -24,7 +24,14 @@ public class ProductService {
         this.userRepository = userRepository;
     }
 
-    public Page<Product> getAllProducts(Pageable pageable) {
+    public Page<Product> getAllProducts(String name, String category, Pageable pageable) {
+        if (name != null && !name.isBlank() && category != null && !category.isBlank()) {
+            return productRepository.findByNameContainingIgnoreCaseAndCategoryIgnoreCase(name, category, pageable);
+        } else if (name != null && !name.isBlank()) {
+            return productRepository.findByNameContainingIgnoreCase(name, pageable);
+        } else if (category != null && !category.isBlank()) {
+            return productRepository.findByCategoryIgnoreCase(category, pageable);
+        }
         return productRepository.findAll(pageable);
     }
 
@@ -33,12 +40,12 @@ public class ProductService {
     }
 
     public Product createProduct(CreateProductRequest request) {
-        // Cari penjual di database berdasarkan sellerId kiriman tamu
         User seller = userRepository.findById(request.sellerId())
                 .orElseThrow(() -> new IllegalArgumentException("Penjual dengan ID " + request.sellerId() + " tidak ditemukan!"));
 
-        Product newProduct = new Product(request.name(), request.price(), request.stock());
-        newProduct.setSeller(seller); // Ikat produk ke penjualnya!
+        // Tambahkan request.category() di parameter ke-4:
+        Product newProduct = new Product(request.name(), request.price(), request.stock(), request.category());
+        newProduct.setSeller(seller);
 
         return productRepository.save(newProduct);
     }

@@ -24,8 +24,11 @@ public class ProductController {
     }
 
     @GetMapping
-    public Page<Product> getAll(Pageable pageable) {
-        return productService.getAllProducts(pageable);
+    public Page<Product> getAll(
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) String category,
+            Pageable pageable) {
+        return productService.getAllProducts(name, category, pageable);
     }
 
     @GetMapping("/{id}")

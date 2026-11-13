@@ -17,6 +17,9 @@ public record CreateProductRequest(
     @Min(value = 0, message = "Stok produk tidak boleh bernilai negatif!")
     Integer stock,
 
+    @NotBlank(message = "Kategori produk tidak boleh kosong!")
+    String category,
+
     @NotNull(message = "ID Penjual (sellerId) wajib diisi!")
     Long sellerId
 ) {
