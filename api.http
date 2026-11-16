@@ -123,3 +123,22 @@ Content-Type: application/json
 ### 14. Batalkan Pesanan (CANCELLED) & Uji Coba Auto-Restock
 # Ekspektasi: Status jadi CANCELLED, dan stok barang otomatis dikembalikan ke toko!
 PUT http://localhost:8080/api/orders/1/status?status=CANCELLED
+
+### 1. Minta Ambilkan Semua Produk (GET)
+GET http://localhost:8080/api/products
+
+### 3. Kirim Bungkusan Produk Baru (POST)
+POST http://localhost:8080/api/products
+Content-Type: application/json
+
+{
+  "name": "Kopi Susu Gula Aren 1 Liter",
+  "price": 65000.0,
+  "stock": 15,
+  "category": "Minuman",
+  "sellerId": 1,
+  "description": "Espresso blend dengan susu segar dan gula aren asli, botol 1 Liter tahan 5 hari di kulkas.",
+  "imageUrl": "https://images.unsplash.com/photo-1517701550927-30cf4ba1dba5",
+  "sku": "KOP-SUSU-1L",
+  "weightGram": 1100
+}

@@ -21,7 +21,12 @@ public record CreateProductRequest(
     String category,
 
     @NotNull(message = "ID Penjual (sellerId) wajib diisi!")
-    Long sellerId
+    Long sellerId,
+
+    // Field tambahan e-commerce real:
+    String description,
+    String imageUrl,
+    String sku,
+    Integer weightGram
 ) {
-    // Dengan record: otomatis aman, tidak bisa disisipi kolom liar oleh hacker!
 }

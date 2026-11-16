@@ -43,8 +43,16 @@ public class ProductService {
         User seller = userRepository.findById(request.sellerId())
                 .orElseThrow(() -> new IllegalArgumentException("Penjual dengan ID " + request.sellerId() + " tidak ditemukan!"));
 
-        // Tambahkan request.category() di parameter ke-4:
-        Product newProduct = new Product(request.name(), request.price(), request.stock(), request.category());
+        Product newProduct = new Product(
+                request.name(), 
+                request.price(), 
+                request.stock(), 
+                request.category(),
+                request.description(),
+                request.imageUrl(),
+                request.sku(),
+                request.weightGram()
+        );
         newProduct.setSeller(seller);
 
         return productRepository.save(newProduct);

@@ -15,27 +15,47 @@ public class Product {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "seller_id") // Nama kolom foreign key di SQL
+    @JoinColumn(name = "seller_id")
     private User seller;
 
     @NotBlank(message = "Nama produk tidak boleh kosong!")
     private String name;
+
     @NotNull(message = "Harga produk wajib diisi!")
     @Positive(message = "Harga produk harus lebih besar dari 0!")
     private Double price;
+
     @NotNull(message = "Stok produk wajib diisi!")
     @Min(value = 0, message = "Stok produk tidak boleh bernilai negatif!")
     private Integer stock;
+
     @NotBlank(message = "Kategori produk tidak boleh kosong!")
     private String category;
 
+    // === FIELD BARU UNTUK REAL MARKETPLACE ===
+    @Column(columnDefinition = "TEXT") // Supaya muat deskripsi panjang di database
+    private String description;
+
+    private String imageUrl;
+
+    private String sku; // Contoh: KOP-GAYO-250G
+
+    private Integer weightGram = 100; // Default 100 gram
+
+    private Integer totalSold = 0; // Default 0 terjual
+
     public Product() {} // Constructor kosong wajib untuk JPA
 
-    public Product(String name, Double price, Integer stock,String category) {
+    public Product(String name, Double price, Integer stock, String category, String description, String imageUrl, String sku, Integer weightGram) {
         this.name = name;
         this.price = price;
         this.stock = stock;
         this.category = category;
+        this.description = description;
+        this.imageUrl = imageUrl;
+        this.sku = sku;
+        this.weightGram = weightGram != null ? weightGram : 100;
+        this.totalSold = 0;
     }
 
     // Getter dan Setter
@@ -56,4 +76,19 @@ public class Product {
 
     public String getCategory() { return category; }
     public void setCategory(String category) { this.category = category; }
+
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
+
+    public String getImageUrl() { return imageUrl; }
+    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
+
+    public String getSku() { return sku; }
+    public void setSku(String sku) { this.sku = sku; }
+
+    public Integer getWeightGram() { return weightGram; }
+    public void setWeightGram(Integer weightGram) { this.weightGram = weightGram; }
+
+    public Integer getTotalSold() { return totalSold; }
+    public void setTotalSold(Integer totalSold) { this.totalSold = totalSold; }
 }
