@@ -22,6 +22,10 @@ public class MyApiApplication {
             com.belajar.model.User tokoKopi = userRepository.save(
                 new com.belajar.model.User("Toko Kopi Nusantara", "kopinusantara@mail.com", com.belajar.model.Role.SELLER)
             );
+            userRepository.save(
+                new com.belajar.model.User("Budi Santoso", "budi@mail.com", com.belajar.model.Role.BUYER)
+            );
+
 
             // 2. Buat Produk yang terikat ke Toko Kopi Nusantara
             com.belajar.model.Product p1 = new com.belajar.model.Product("Kopi Gayo Arabika", 85000.0, 20, "Minuman");

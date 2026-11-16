@@ -76,3 +76,50 @@ GET http://localhost:8080/api/products?name=Gayo
 ### 10. Uji Coba Filter Kategori: Cari Produk dengan Kategori "Minuman" (?category=Minuman)
 # Ekspektasi: Kopi Gayo dan Teh Walini sama-sama muncul
 GET http://localhost:8080/api/products?category=Minuman
+
+### ========================================================
+### 4. TRANSAKSI MARKETPLACE (CHECKOUT KERANJANG BELANJA)
+### ========================================================
+
+### 11. Checkout Keranjang: Budi (buyerId=2) Beli 2 Kopi Gayo (ID 1)
+# Ekspektasi: 201 Created, Total Rp 170.000, Stok Kopi Gayo dari 20 berkurang jadi 18!
+POST http://localhost:8080/api/orders
+Content-Type: application/json
+
+{
+  "buyerId": 2,
+  "items": [
+    {
+      "productId": 1,
+      "quantity": 2
+    }
+  ]
+}
+
+###
+
+### 12. Cek Stok Kopi Gayo Setelah Checkout: Pastikan Stok Berkurang!
+GET http://localhost:8080/api/products/1
+
+###
+
+### 13. Uji Coba Checkout Gagal: Beli Barang Melebihi Sisa Stok (Minta 500 Pcs!)
+# Ekspektasi: Ditolak 400 Bad Request: "Stok tidak mencukupi..."
+POST http://localhost:8080/api/orders
+Content-Type: application/json
+
+{
+  "buyerId": 2,
+  "items": [
+    {
+      "productId": 1,
+      "quantity": 500
+    }
+  ]
+}
+
+###
+
+### 14. Batalkan Pesanan (CANCELLED) & Uji Coba Auto-Restock
+# Ekspektasi: Status jadi CANCELLED, dan stok barang otomatis dikembalikan ke toko!
+PUT http://localhost:8080/api/orders/1/status?status=CANCELLED
