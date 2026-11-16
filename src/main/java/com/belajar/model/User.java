@@ -18,12 +18,31 @@ public class User {
     @Enumerated(EnumType.STRING)
     private Role role;
 
+    // === FIELD BARU REAL MARKETPLACE ===
+    private String phoneNumber; // Contoh: "081234567890"
+
+    private String city; // Contoh: "Jakarta Selatan" atau "Banda Aceh"
+
+    @Column(columnDefinition = "TEXT")
+    private String address; // Alamat toko / alamat default pembeli
+
     public User() {}
 
+    // Constructor lama (tetap dipertahankan supaya backward-compatible)
     public User(String name, String email, Role role) {
         this.name = name;
         this.email = email;
         this.role = role;
+    }
+
+    // Constructor baru lengkap
+    public User(String name, String email, Role role, String phoneNumber, String city, String address) {
+        this.name = name;
+        this.email = email;
+        this.role = role;
+        this.phoneNumber = phoneNumber;
+        this.city = city;
+        this.address = address;
     }
 
     // Getter dan Setter
@@ -38,4 +57,13 @@ public class User {
 
     public Role getRole() { return role; }
     public void setRole(Role role) { this.role = role; }
+
+    public String getPhoneNumber() { return phoneNumber; }
+    public void setPhoneNumber(String phoneNumber) { this.phoneNumber = phoneNumber; }
+
+    public String getCity() { return city; }
+    public void setCity(String city) { this.city = city; }
+
+    public String getAddress() { return address; }
+    public void setAddress(String address) { this.address = address; }
 }

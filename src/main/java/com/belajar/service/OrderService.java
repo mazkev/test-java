@@ -32,7 +32,6 @@ public class OrderService {
         return orderRepository.findById(id);
     }
 
-    // @Transactional: Menjamin jika ada 1 barang gagal, seluruh transaksi dibatalkan (Rollback)!
     @Transactional
     public Order checkout(CheckoutRequest request) {
         // 1. Ambil data pembeli
@@ -43,21 +42,31 @@ public class OrderService {
             throw new IllegalStateException("Hanya akun dengan role BUYER yang berhak belanja!");
         }
 
-        Order order = new Order(buyer);
+        // Jika alamat tidak diisi di request, pakai alamat tersimpan di profil pembeli
+        String address = (request.shippingAddress() != null && !request.shippingAddress().isBlank()) 
+                ? request.shippingAddress() 
+                : buyer.getAddress();
+
+        String courier = request.shippingCourier() != null ? request.shippingCourier() : "JNE Reguler";
+        Double shippingCost = request.shippingCost() != null ? request.shippingCost() : 15000.0;
+        String paymentMethod = request.paymentMethod() != null ? request.paymentMethod() : "BCA_VA";
+
+        Order order = new Order(buyer, address, courier, shippingCost, paymentMethod);
 
         // 2. Loop setiap barang di keranjang belanja
         for (var item : request.items()) {
             Product product = productRepository.findById(item.productId())
                     .orElseThrow(() -> new IllegalArgumentException("Produk ID " + item.productId() + " tidak ditemukan!"));
 
-            // Validasi Stok: Cukup atau tidak?
+            // Validasi Stok
             if (product.getStock() < item.quantity()) {
                 throw new IllegalStateException("Stok tidak mencukupi untuk: " + product.getName() 
                         + " (Sisa: " + product.getStock() + ", Diminta: " + item.quantity() + ")");
             }
 
-            // POTONG STOK DI DATABASE!
+            // Potong stok dan tambah angka total terjual!
             product.setStock(product.getStock() - item.quantity());
+            product.setTotalSold(product.getTotalSold() + item.quantity());
             productRepository.save(product);
 
             // Buat snapshot rincian barang
@@ -88,6 +97,12 @@ public class OrderService {
                 });
             }
         }
+
+            // Jika status berubah jadi SHIPPED, generate nomor resi otomatis (kalau belum ada resi)
+        if (newStatus == OrderStatus.SHIPPED && order.getTrackingNumber() == null) {
+            order.setTrackingNumber("RESI-JNE-" + System.currentTimeMillis());
+        }
+
 
         order.setStatus(newStatus);
         return orderRepository.save(order);

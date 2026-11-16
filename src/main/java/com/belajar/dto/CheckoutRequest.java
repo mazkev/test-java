@@ -9,9 +9,14 @@ public record CheckoutRequest(
     Long buyerId,
 
     @NotEmpty(message = "Keranjang belanja tidak boleh kosong!")
-    List<CartItemDto> items
+    List<CartItemDto> items,
+
+    // Field tambahan transaksi real:
+    String shippingAddress,
+    String shippingCourier,
+    Double shippingCost,
+    String paymentMethod
 ) {
-    // Record kecil untuk tiap item di keranjang belanja
     public record CartItemDto(
         @NotNull(message = "ID Produk wajib diisi!")
         Long productId,

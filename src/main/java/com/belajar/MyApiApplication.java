@@ -18,12 +18,28 @@ public class MyApiApplication {
         @Bean
     public CommandLineRunner initData(ProductRepository productRepository, com.belajar.repository.UserRepository userRepository) {
         return args -> {
-            // 1. Buat Toko Penjual ID 1
+                        // 1. Buat Toko Penjual ID 1 (Lengkap dengan No HP, Kota Gudang, dan Alamat)
             com.belajar.model.User tokoKopi = userRepository.save(
-                new com.belajar.model.User("Toko Kopi Nusantara", "kopinusantara@mail.com", com.belajar.model.Role.SELLER)
+                new com.belajar.model.User(
+                    "Toko Kopi Nusantara", 
+                    "kopinusantara@mail.com", 
+                    com.belajar.model.Role.SELLER,
+                    "081122334455",
+                    "Banda Aceh",
+                    "Jl. Teuku Umar No. 88, Banda Aceh"
+                )
             );
+
+            // Buat Pembeli ID 2 (Budi Santoso)
             userRepository.save(
-                new com.belajar.model.User("Budi Santoso", "budi@mail.com", com.belajar.model.Role.BUYER)
+                new com.belajar.model.User(
+                    "Budi Santoso", 
+                    "budi@mail.com", 
+                    com.belajar.model.Role.BUYER,
+                    "081987654321",
+                    "Jakarta Selatan",
+                    "Jl. Sudirman Kav. 25, RT 01/RW 02, Jakarta Selatan"
+                )
             );
 
 

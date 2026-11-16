@@ -142,3 +142,28 @@ Content-Type: application/json
   "sku": "KOP-SUSU-1L",
   "weightGram": 1100
 }
+
+### 11. Checkout Keranjang: Budi Beli 2 Kopi Gayo Lengkap dengan Kurir & Alamat
+POST http://localhost:8080/api/orders
+Content-Type: application/json
+
+{
+  "buyerId": 2,
+  "shippingCourier": "JNE Reguler",
+  "shippingCost": 18000.0,
+  "paymentMethod": "BCA_VA",
+  "shippingAddress": "Jl. Sudirman Kav. 25, RT 01/RW 02, Jakarta Selatan",
+  "items": [
+    {
+      "productId": 1,
+      "quantity": 2
+    }
+  ]
+}
+
+### 12. Cek Stok & Total Terjual Kopi Gayo
+GET http://localhost:8080/api/products/1
+
+### 15. Penjual Mengirim Pesanan (Status: SHIPPED)
+# Ekspektasi: Muncul nomor resi pelacakan otomatis (RESI-JNE-...)
+PUT http://localhost:8080/api/orders/1/status?status=SHIPPED
