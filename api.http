@@ -247,3 +247,37 @@ Content-Type: application/json
   "sku": "KOP-MAND-250G",
   "weightGram": 250
 }
+
+### 11. Checkout Keranjang: Budi Belanja (ID Diambil Otomatis dari Token JWT!)
+# Ekspektasi: 201 Created, data pesanan otomatis terhubung ke Budi Santoso!
+POST http://localhost:8080/api/orders
+Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJidWRpQG1haWwuY29tIiwidXNlcklkIjoyLCJyb2xlIjoiQlVZRVIiLCJpYXQiOjE3OTQ5MDE3MjgsImV4cCI6MTc5NDk4ODEyOH0.RK0IQJPPEROmY2W7LaYJpMHO5ugH0SOluuJqoMTCrjJrmLPrUSa1NCcCUoS-IAo8
+Content-Type: application/json
+
+{
+  "shippingCourier": "JNE Reguler",
+  "shippingCost": 18000.0,
+  "paymentMethod": "BCA_VA",
+  "items": [
+    {
+      "productId": 1,
+      "quantity": 1
+    }
+  ]
+}
+
+### 20. Penjual Resmi (SELLER) Tambah Produk (Seller Otomatis dari Token JWT)
+# Ekspektasi: 201 Created, produk baru otomatis milik Toko Kopi Nusantara!
+POST http://localhost:8080/api/products
+Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJrb3BpbnVzYW50YXJhQG1haWwuY29tIiwidXNlcklkIjoxLCJyb2xlIjoiU0VMTEVSIiwiaWF0IjoxNzk0OTAxOTM4LCJleHAiOjE3OTQ5ODgzMzh9.XRXB8reoP3ZS8RfVNk24kGoGPWD--BMDrwsjvAR9uhJJO9ApIY_Sk3C0CB-3Bt6t
+Content-Type: application/json
+
+{
+  "name": "Kopi Toraja Sapan 250g",
+  "price": 95000.0,
+  "stock": 30,
+  "category": "Minuman",
+  "description": "Kopi Arabika Toraja Sapan dengan aroma floral dan dark chocolate.",
+  "sku": "KOP-TOR-250G",
+  "weightGram": 250
+}

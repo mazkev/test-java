@@ -5,8 +5,6 @@ import jakarta.validation.constraints.NotNull;
 import java.util.List;
 
 public record CheckoutRequest(
-    @NotNull(message = "ID Pembeli (buyerId) wajib diisi!")
-    Long buyerId,
 
     @NotEmpty(message = "Keranjang belanja tidak boleh kosong!")
     List<CartItemDto> items,

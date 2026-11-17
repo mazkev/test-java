@@ -33,10 +33,10 @@ public class OrderService {
     }
 
     @Transactional
-    public Order checkout(CheckoutRequest request) {
-        // 1. Ambil data pembeli
-        User buyer = userRepository.findById(request.buyerId())
-                .orElseThrow(() -> new IllegalArgumentException("Pembeli dengan ID " + request.buyerId() + " tidak ditemukan!"));
+    public Order checkout(CheckoutRequest request, String buyerEmail) {
+        // 1. Ambil data pembeli langsung dari email yang ada di tiket JWT
+        User buyer = userRepository.findByEmail(buyerEmail)
+                .orElseThrow(() -> new IllegalArgumentException("Pembeli dengan email " + buyerEmail + " tidak ditemukan!"));
 
         if (buyer.getRole() != Role.BUYER) {
             throw new IllegalStateException("Hanya akun dengan role BUYER yang berhak belanja!");

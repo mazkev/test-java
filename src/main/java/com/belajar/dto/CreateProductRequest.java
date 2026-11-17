@@ -20,8 +20,6 @@ public record CreateProductRequest(
     @NotBlank(message = "Kategori produk tidak boleh kosong!")
     String category,
 
-    @NotNull(message = "ID Penjual (sellerId) wajib diisi!")
-    Long sellerId,
 
     // Field tambahan e-commerce real:
     String description,

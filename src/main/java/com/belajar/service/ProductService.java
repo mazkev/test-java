@@ -39,9 +39,9 @@ public class ProductService {
         return productRepository.findById(id);
     }
 
-    public Product createProduct(CreateProductRequest request) {
-        User seller = userRepository.findById(request.sellerId())
-                .orElseThrow(() -> new IllegalArgumentException("Penjual dengan ID " + request.sellerId() + " tidak ditemukan!"));
+    public Product createProduct(CreateProductRequest request, String sellerEmail) {
+        User seller = userRepository.findByEmail(sellerEmail)
+                .orElseThrow(() -> new IllegalArgumentException("Penjual dengan email " + sellerEmail + " tidak ditemukan!"));
 
         Product newProduct = new Product(
                 request.name(), 

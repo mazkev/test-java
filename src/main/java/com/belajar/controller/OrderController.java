@@ -35,8 +35,10 @@ public class OrderController {
 
     // 1. POST /api/orders : Checkout Keranjang Belanja
     @PostMapping
-    public ResponseEntity<Order> checkout(@Valid @RequestBody CheckoutRequest request) {
-        Order createdOrder = orderService.checkout(request);
+    public ResponseEntity<Order> checkout(
+            @Valid @RequestBody CheckoutRequest request,
+            java.security.Principal principal) {
+        Order createdOrder = orderService.checkout(request, principal.getName());
         return new ResponseEntity<>(createdOrder, HttpStatus.CREATED);
     }
 
