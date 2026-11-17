@@ -6,6 +6,8 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 @SpringBootApplication
 public class MyApiApplication {
@@ -14,15 +16,27 @@ public class MyApiApplication {
         SpringApplication.run(MyApiApplication.class, args);
     }
 
-    // Mengisi 2 data produk awal ke database saat server baru start
-        @Bean
-    public CommandLineRunner initData(ProductRepository productRepository, com.belajar.repository.UserRepository userRepository) {
+    // Mesin pencampur/blender password standar industri (BCrypt)
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public CommandLineRunner initData(
+            ProductRepository productRepository, 
+            com.belajar.repository.UserRepository userRepository,
+            PasswordEncoder passwordEncoder) {
         return args -> {
-                        // 1. Buat Toko Penjual ID 1 (Lengkap dengan No HP, Kota Gudang, dan Alamat)
+            // Password bawaan untuk testing: "password123" yang sudah di-hash BCrypt
+            String defaultHashedPassword = passwordEncoder.encode("password123");
+
+            // 1. Toko Penjual ID 1
             com.belajar.model.User tokoKopi = userRepository.save(
                 new com.belajar.model.User(
                     "Toko Kopi Nusantara", 
                     "kopinusantara@mail.com", 
+                    defaultHashedPassword,
                     com.belajar.model.Role.SELLER,
                     "081122334455",
                     "Banda Aceh",
@@ -30,11 +44,12 @@ public class MyApiApplication {
                 )
             );
 
-            // Buat Pembeli ID 2 (Budi Santoso)
+            // 2. Pembeli ID 2 (Budi Santoso)
             userRepository.save(
                 new com.belajar.model.User(
                     "Budi Santoso", 
                     "budi@mail.com", 
+                    defaultHashedPassword,
                     com.belajar.model.Role.BUYER,
                     "081987654321",
                     "Jakarta Selatan",
@@ -42,8 +57,7 @@ public class MyApiApplication {
                 )
             );
 
-
-                        // 2. Buat Produk yang terikat ke Toko Kopi Nusantara
+            // 3. Produk awal
             com.belajar.model.Product p1 = new com.belajar.model.Product(
                 "Kopi Gayo Arabika", 
                 85000.0, 

@@ -1,5 +1,6 @@
 package com.belajar.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 @Entity
@@ -15,30 +16,25 @@ public class User {
     @Column(unique = true)
     private String email;
 
+    @JsonIgnore // Sangat penting! Password tidak boleh ikut terpapar di response JSON
+    private String password;
+
     @Enumerated(EnumType.STRING)
     private Role role;
 
-    // === FIELD BARU REAL MARKETPLACE ===
-    private String phoneNumber; // Contoh: "081234567890"
-
-    private String city; // Contoh: "Jakarta Selatan" atau "Banda Aceh"
+    private String phoneNumber;
+    private String city;
 
     @Column(columnDefinition = "TEXT")
-    private String address; // Alamat toko / alamat default pembeli
+    private String address;
 
     public User() {}
 
-    // Constructor lama (tetap dipertahankan supaya backward-compatible)
-    public User(String name, String email, Role role) {
+    // Constructor lengkap dengan password
+    public User(String name, String email, String password, Role role, String phoneNumber, String city, String address) {
         this.name = name;
         this.email = email;
-        this.role = role;
-    }
-
-    // Constructor baru lengkap
-    public User(String name, String email, Role role, String phoneNumber, String city, String address) {
-        this.name = name;
-        this.email = email;
+        this.password = password;
         this.role = role;
         this.phoneNumber = phoneNumber;
         this.city = city;
@@ -54,6 +50,9 @@ public class User {
 
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }
+
+    public String getPassword() { return password; }
+    public void setPassword(String password) { this.password = password; }
 
     public Role getRole() { return role; }
     public void setRole(Role role) { this.role = role; }

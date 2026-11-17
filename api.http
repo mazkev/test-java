@@ -167,3 +167,83 @@ GET http://localhost:8080/api/products/1
 ### 15. Penjual Mengirim Pesanan (Status: SHIPPED)
 # Ekspektasi: Muncul nomor resi pelacakan otomatis (RESI-JNE-...)
 PUT http://localhost:8080/api/orders/1/status?status=SHIPPED
+
+### ========================================================
+### 5. SISTEM KEAMANAN & AUTENTIKASI (SPRING SECURITY + JWT)
+### ========================================================
+
+### 16. Login sebagai Toko Kopi (Role: SELLER)
+# Ekspektasi: 200 OK dan mendapatkan Token JWT dengan role SELLER!
+# @name loginSeller
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "kopinusantara@mail.com",
+  "password": "password123"
+}
+
+###
+
+### 17. Login sebagai Budi Santoso (Role: BUYER)
+# Ekspektasi: 200 OK dan mendapatkan Token JWT dengan role BUYER!
+# @name loginBuyer
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "budi@mail.com",
+  "password": "password123"
+}
+
+###
+
+### 18. Uji Coba Satpam: Coba Tambah Produk TANPA Login / Tiket JWT
+# Ekspektasi: Ditolak Satpam 403 Forbidden!
+POST http://localhost:8080/api/products
+Content-Type: application/json
+
+{
+  "name": "Kopi Ilegal Tanpa Login",
+  "price": 50000.0,
+  "stock": 10,
+  "category": "Minuman",
+  "sellerId": 1
+}
+
+###
+
+### 19. Uji Coba RBAC (Hak Akses): Budi (BUYER) Nekat Mau Tambah Produk Toko!
+# Ekspektasi: Ditolak 403 Forbidden karena tiket Budi bertuliskan BUYER, bukan SELLER!
+# Ganti <TOKEN_BUDI> dengan token dari response Login Budi (Request 17)
+POST http://localhost:8080/api/products
+Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJrb3BpbnVzYW50YXJhQG1haWwuY29tIiwidXNlcklkIjoxLCJyb2xlIjoiU0VMTEVSIiwiaWF0IjoxNzk0OTAxOTM4LCJleHAiOjE3OTQ5ODgzMzh9.XRXB8reoP3ZS8RfVNk24kGoGPWD--BMDrwsjvAR9uhJJO9ApIY_Sk3C0CB-3Bt6t
+Content-Type: application/json
+
+{
+  "name": "Kopi Bajakan Milik Buyer",
+  "price": 20000.0,
+  "stock": 5,
+  "category": "Minuman",
+  "sellerId": 1
+}
+
+###
+
+### 20. Penjual Resmi (SELLER) Tambah Produk dengan Token Sah
+# Ekspektasi: 201 Created! Berhasil lolos satpam!
+# Ganti <TOKEN_SELLER> dengan token dari response Login Toko Kopi (Request 16)
+POST http://localhost:8080/api/products
+Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJrb3BpbnVzYW50YXJhQG1haWwuY29tIiwidXNlcklkIjoxLCJyb2xlIjoiU0VMTEVSIiwiaWF0IjoxNzk0OTAxOTM4LCJleHAiOjE3OTQ5ODgzMzh9.XRXB8reoP3ZS8RfVNk24kGoGPWD--BMDrwsjvAR9uhJJO9ApIY_Sk3C0CB-3Bt6t
+Content-Type: application/json
+
+{
+  "name": "Kopi Arabika Mandailing 250g",
+  "price": 90000.0,
+  "stock": 25,
+  "category": "Minuman",
+  "sellerId": 1,
+  "description": "Kopi Arabika Mandailing dengan rasa earthy khas Sumatera.",
+  "sku": "KOP-MAND-250G",
+  "weightGram": 250
+}
