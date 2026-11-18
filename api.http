@@ -1,181 +1,12 @@
-### 1. Minta Ambilkan Semua Produk (GET)
-GET http://localhost:8080/api/products
-
-###
-
-### 2. Minta Ambilkan Produk ID 1 (GET by ID)
-GET http://localhost:8080/api/products/1
-
-###
-
-### 3. Kirim Bungkusan Produk Baru (POST)
-POST http://localhost:8080/api/products
-Content-Type: application/json
-
-{
-  "name": "Kopi Susu Gula Aren",
-  "price": 18000.0,
-  "stock": 35
-}
-
-###
-
-### 4. Ubah Data Produk ID 1 (PUT)
-PUT http://localhost:8080/api/products/1
-Content-Type: application/json
-
-{
-  "name": "Kopi Gayo Arabika Premium (Diskon)",
-  "price": 75000.0,
-  "stock": 15
-}
-
-###
-
-### 5. Minta Hapus Produk ID 2 (DELETE)
-DELETE http://localhost:8080/api/products/2
-
-### 6. Uji Coba Satpam: Kirim Data Rusak (POST)
-# Ekspektasi: Ditolak 400 Bad Request dengan rincian pesan error!
-POST http://localhost:8080/api/products
-Content-Type: application/json
-
-{
-  "name": "",
-  "price": -50000.0,
-  "stock": -10
-}
-
-### 7. Uji Coba Pagination: Minta Halaman 0, Ukuran 1 Barang per Halaman
-# Ekspektasi: Hanya muncul 1 barang, tapi ada info totalPages dan totalElements
-GET http://localhost:8080/api/products?page=0&size=1
-
-###
-
-### 8. Uji Coba Sorting: Urutkan Produk dari yang TERMAHAL ke Termurah (price,desc)
-# Ekspektasi: Kopi Gayo (85000) muncul duluan sebelum Teh Walini (25000)
-GET http://localhost:8080/api/products?sort=price,desc
-
-### 3. Kirim Bungkusan Produk Baru (POST)
-POST http://localhost:8080/api/products
-Content-Type: application/json
-
-{
-  "name": "Kopi Susu Gula Aren",
-  "price": 18000.0,
-  "stock": 35,
-  "sellerId": 1
-}
-
-### 9. Uji Coba Pencarian: Cari Produk yang Ada Kata "Gayo" (?name=Gayo)
-# Ekspektasi: Hanya Kopi Gayo yang muncul
-GET http://localhost:8080/api/products?name=Gayo
-
-###
-
-### 10. Uji Coba Filter Kategori: Cari Produk dengan Kategori "Minuman" (?category=Minuman)
-# Ekspektasi: Kopi Gayo dan Teh Walini sama-sama muncul
-GET http://localhost:8080/api/products?category=Minuman
+@baseUrl = http://localhost:8080
 
 ### ========================================================
-### 4. TRANSAKSI MARKETPLACE (CHECKOUT KERANJANG BELANJA)
+### 1. AUTENTIKASI & KEAMANAN (AUTH & JWT)
 ### ========================================================
 
-### 11. Checkout Keranjang: Budi (buyerId=2) Beli 2 Kopi Gayo (ID 1)
-# Ekspektasi: 201 Created, Total Rp 170.000, Stok Kopi Gayo dari 20 berkurang jadi 18!
-POST http://localhost:8080/api/orders
-Content-Type: application/json
-
-{
-  "buyerId": 2,
-  "items": [
-    {
-      "productId": 1,
-      "quantity": 2
-    }
-  ]
-}
-
-###
-
-### 12. Cek Stok Kopi Gayo Setelah Checkout: Pastikan Stok Berkurang!
-GET http://localhost:8080/api/products/1
-
-###
-
-### 13. Uji Coba Checkout Gagal: Beli Barang Melebihi Sisa Stok (Minta 500 Pcs!)
-# Ekspektasi: Ditolak 400 Bad Request: "Stok tidak mencukupi..."
-POST http://localhost:8080/api/orders
-Content-Type: application/json
-
-{
-  "buyerId": 2,
-  "items": [
-    {
-      "productId": 1,
-      "quantity": 500
-    }
-  ]
-}
-
-###
-
-### 14. Batalkan Pesanan (CANCELLED) & Uji Coba Auto-Restock
-# Ekspektasi: Status jadi CANCELLED, dan stok barang otomatis dikembalikan ke toko!
-PUT http://localhost:8080/api/orders/1/status?status=CANCELLED
-
-### 1. Minta Ambilkan Semua Produk (GET)
-GET http://localhost:8080/api/products
-
-### 3. Kirim Bungkusan Produk Baru (POST)
-POST http://localhost:8080/api/products
-Content-Type: application/json
-
-{
-  "name": "Kopi Susu Gula Aren 1 Liter",
-  "price": 65000.0,
-  "stock": 15,
-  "category": "Minuman",
-  "sellerId": 1,
-  "description": "Espresso blend dengan susu segar dan gula aren asli, botol 1 Liter tahan 5 hari di kulkas.",
-  "imageUrl": "https://images.unsplash.com/photo-1517701550927-30cf4ba1dba5",
-  "sku": "KOP-SUSU-1L",
-  "weightGram": 1100
-}
-
-### 11. Checkout Keranjang: Budi Beli 2 Kopi Gayo Lengkap dengan Kurir & Alamat
-POST http://localhost:8080/api/orders
-Content-Type: application/json
-
-{
-  "buyerId": 2,
-  "shippingCourier": "JNE Reguler",
-  "shippingCost": 18000.0,
-  "paymentMethod": "BCA_VA",
-  "shippingAddress": "Jl. Sudirman Kav. 25, RT 01/RW 02, Jakarta Selatan",
-  "items": [
-    {
-      "productId": 1,
-      "quantity": 2
-    }
-  ]
-}
-
-### 12. Cek Stok & Total Terjual Kopi Gayo
-GET http://localhost:8080/api/products/1
-
-### 15. Penjual Mengirim Pesanan (Status: SHIPPED)
-# Ekspektasi: Muncul nomor resi pelacakan otomatis (RESI-JNE-...)
-PUT http://localhost:8080/api/orders/1/status?status=SHIPPED
-
-### ========================================================
-### 5. SISTEM KEAMANAN & AUTENTIKASI (SPRING SECURITY + JWT)
-### ========================================================
-
-### 16. Login sebagai Toko Kopi (Role: SELLER)
-# Ekspektasi: 200 OK dan mendapatkan Token JWT dengan role SELLER!
+### 1.1 Login sebagai Toko Kopi Nusantara (Role: SELLER)
 # @name loginSeller
-POST http://localhost:8080/api/auth/login
+POST {{baseUrl}}/api/auth/login
 Content-Type: application/json
 
 {
@@ -185,10 +16,9 @@ Content-Type: application/json
 
 ###
 
-### 17. Login sebagai Budi Santoso (Role: BUYER)
-# Ekspektasi: 200 OK dan mendapatkan Token JWT dengan role BUYER!
+### 1.2 Login sebagai Budi Santoso (Role: BUYER)
 # @name loginBuyer
-POST http://localhost:8080/api/auth/login
+POST {{baseUrl}}/api/auth/login
 Content-Type: application/json
 
 {
@@ -198,78 +28,121 @@ Content-Type: application/json
 
 ###
 
-### 18. Uji Coba Satpam: Coba Tambah Produk TANPA Login / Tiket JWT
-# Ekspektasi: Ditolak Satpam 403 Forbidden!
-POST http://localhost:8080/api/products
+### 1.3 Registrasi Akun Pembeli Baru (Siti Aminah - Role: BUYER)
+# @name registerBuyer
+POST {{baseUrl}}/api/auth/register
+Content-Type: application/json
+
+{
+  "name": "Siti Aminah",
+  "email": "siti@mail.com",
+  "password": "password123",
+  "role": "BUYER",
+  "phoneNumber": "081299887766",
+  "city": "Surabaya",
+  "address": "Jl. Pemuda No. 45, Gubeng, Surabaya"
+}
+
+###
+
+### 1.4 Uji Coba Validasi: Daftar Ulang dengan Email yang Sama
+# Ekspektasi: 400 Bad Request ("Email siti@mail.com sudah terdaftar!")
+POST {{baseUrl}}/api/auth/register
+Content-Type: application/json
+
+{
+  "name": "Siti Kloning",
+  "email": "siti@mail.com",
+  "password": "password123",
+  "role": "BUYER"
+}
+
+###
+
+### 1.5 Registrasi Akun Penjual Baru (Toko Buku Pintar - Role: SELLER)
+# @name registerSeller
+POST {{baseUrl}}/api/auth/register
+Content-Type: application/json
+
+{
+  "name": "Toko Buku Pintar",
+  "email": "bukupintar@mail.com",
+  "password": "password123",
+  "role": "SELLER",
+  "phoneNumber": "081344556677",
+  "city": "Yogyakarta",
+  "address": "Jl. Malioboro No. 10, Yogyakarta"
+}
+
+### ========================================================
+### 2. KATALOG PRODUK PUBLIK (BEBAS AKSES / TANPA LOGIN)
+### ========================================================
+
+### 2.1 Ambil Semua Produk (Katalog Terbuka)
+GET {{baseUrl}}/api/products
+
+###
+
+### 2.2 Ambil Produk Tertentu (ID 1)
+GET {{baseUrl}}/api/products/1
+
+###
+
+### 2.3 Uji Pagination (Halaman 0, Ukuran 1 Barang)
+GET {{baseUrl}}/api/products?page=0&size=1
+
+###
+
+### 2.4 Uji Sorting (Urutkan dari Harga Termahal ke Termurah)
+GET {{baseUrl}}/api/products?sort=price,desc
+
+###
+
+### 2.5 Cari Produk Berdasarkan Kata Kunci Nama (?name=Gayo)
+GET {{baseUrl}}/api/products?name=Gayo
+
+###
+
+### 2.6 Filter Produk Berdasarkan Kategori (?category=Minuman)
+GET {{baseUrl}}/api/products?category=Minuman
+
+### ========================================================
+### 3. PENGELOLAAN PRODUK OLEH TOKO (ROLE: SELLER)
+### ========================================================
+
+### 3.1 Uji Coba Satpam: Coba Tambah Produk TANPA Login
+# Ekspektasi: 403 Forbidden!
+POST {{baseUrl}}/api/products
 Content-Type: application/json
 
 {
   "name": "Kopi Ilegal Tanpa Login",
   "price": 50000.0,
   "stock": 10,
-  "category": "Minuman",
-  "sellerId": 1
+  "category": "Minuman"
 }
 
 ###
 
-### 19. Uji Coba RBAC (Hak Akses): Budi (BUYER) Nekat Mau Tambah Produk Toko!
-# Ekspektasi: Ditolak 403 Forbidden karena tiket Budi bertuliskan BUYER, bukan SELLER!
-# Ganti <TOKEN_BUDI> dengan token dari response Login Budi (Request 17)
-POST http://localhost:8080/api/products
-Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJrb3BpbnVzYW50YXJhQG1haWwuY29tIiwidXNlcklkIjoxLCJyb2xlIjoiU0VMTEVSIiwiaWF0IjoxNzk0OTAxOTM4LCJleHAiOjE3OTQ5ODgzMzh9.XRXB8reoP3ZS8RfVNk24kGoGPWD--BMDrwsjvAR9uhJJO9ApIY_Sk3C0CB-3Bt6t
+### 3.2 Uji Coba RBAC: Pembeli (BUYER) Nekat Menambah Produk Toko
+# Ekspektasi: 403 Forbidden (Hanya SELLER yang berhak menambah produk!)
+POST {{baseUrl}}/api/products
+Authorization: Bearer {{loginBuyer.response.body.token}}
 Content-Type: application/json
 
 {
   "name": "Kopi Bajakan Milik Buyer",
   "price": 20000.0,
   "stock": 5,
-  "category": "Minuman",
-  "sellerId": 1
+  "category": "Minuman"
 }
 
 ###
 
-### 20. Penjual Resmi (SELLER) Tambah Produk dengan Token Sah
-# Ekspektasi: 201 Created! Berhasil lolos satpam!
-# Ganti <TOKEN_SELLER> dengan token dari response Login Toko Kopi (Request 16)
-POST http://localhost:8080/api/products
-Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJrb3BpbnVzYW50YXJhQG1haWwuY29tIiwidXNlcklkIjoxLCJyb2xlIjoiU0VMTEVSIiwiaWF0IjoxNzk0OTAxOTM4LCJleHAiOjE3OTQ5ODgzMzh9.XRXB8reoP3ZS8RfVNk24kGoGPWD--BMDrwsjvAR9uhJJO9ApIY_Sk3C0CB-3Bt6t
-Content-Type: application/json
-
-{
-  "name": "Kopi Arabika Mandailing 250g",
-  "price": 90000.0,
-  "stock": 25,
-  "category": "Minuman",
-  "sellerId": 1,
-  "description": "Kopi Arabika Mandailing dengan rasa earthy khas Sumatera.",
-  "sku": "KOP-MAND-250G",
-  "weightGram": 250
-}
-
-### 11. Checkout Keranjang: Budi Belanja (ID Diambil Otomatis dari Token JWT!)
-# Ekspektasi: 201 Created, data pesanan otomatis terhubung ke Budi Santoso!
-POST http://localhost:8080/api/orders
-Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJidWRpQG1haWwuY29tIiwidXNlcklkIjoyLCJyb2xlIjoiQlVZRVIiLCJpYXQiOjE3OTQ5MDE3MjgsImV4cCI6MTc5NDk4ODEyOH0.RK0IQJPPEROmY2W7LaYJpMHO5ugH0SOluuJqoMTCrjJrmLPrUSa1NCcCUoS-IAo8
-Content-Type: application/json
-
-{
-  "shippingCourier": "JNE Reguler",
-  "shippingCost": 18000.0,
-  "paymentMethod": "BCA_VA",
-  "items": [
-    {
-      "productId": 1,
-      "quantity": 1
-    }
-  ]
-}
-
-### 20. Penjual Resmi (SELLER) Tambah Produk (Seller Otomatis dari Token JWT)
-# Ekspektasi: 201 Created, produk baru otomatis milik Toko Kopi Nusantara!
-POST http://localhost:8080/api/products
-Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJrb3BpbnVzYW50YXJhQG1haWwuY29tIiwidXNlcklkIjoxLCJyb2xlIjoiU0VMTEVSIiwiaWF0IjoxNzk0OTAxOTM4LCJleHAiOjE3OTQ5ODgzMzh9.XRXB8reoP3ZS8RfVNk24kGoGPWD--BMDrwsjvAR9uhJJO9ApIY_Sk3C0CB-3Bt6t
+### 3.3 Penjual Resmi (SELLER) Tambah Produk Baru
+# Ekspektasi: 201 Created (Otomatis memakai token Toko Kopi!)
+POST {{baseUrl}}/api/products
+Authorization: Bearer {{loginSeller.response.body.token}}
 Content-Type: application/json
 
 {
@@ -281,3 +154,104 @@ Content-Type: application/json
   "sku": "KOP-TOR-250G",
   "weightGram": 250
 }
+
+###
+
+### 3.4 Uji Coba Satpam Validasi: Kirim Data Produk Rusak
+# Ekspektasi: 400 Bad Request dengan rincian pesan error
+POST {{baseUrl}}/api/products
+Authorization: Bearer {{loginSeller.response.body.token}}
+Content-Type: application/json
+
+{
+  "name": "",
+  "price": -50000.0,
+  "stock": -10,
+  "category": ""
+}
+
+###
+
+### 3.5 Ubah Data Produk ID 1 (PUT)
+PUT {{baseUrl}}/api/products/1
+Authorization: Bearer {{loginSeller.response.body.token}}
+Content-Type: application/json
+
+{
+  "name": "Kopi Gayo Arabika Premium (Diskon Promo)",
+  "price": 75000.0,
+  "stock": 15,
+  "category": "Minuman",
+  "description": "Kopi single origin Gayo Aceh 100% Arabika harga promo spesial.",
+  "sku": "KOP-GAYO-250G",
+  "weightGram": 250
+}
+
+###
+
+### 3.6 Hapus Produk ID 2 (DELETE)
+DELETE {{baseUrl}}/api/products/2
+Authorization: Bearer {{loginSeller.response.body.token}}
+
+### ========================================================
+### 4. TRANSAKSI BELANJA OLEH PEMBELI (ROLE: BUYER)
+### ========================================================
+
+### 4.1 Pembeli (Budi - BUYER) Checkout Belanja 2 Kopi Gayo (ID 1)
+# Ekspektasi: 201 Created (ID Budi otomatis dicabut langsung dari token JWT!)
+POST {{baseUrl}}/api/orders
+Authorization: Bearer {{loginBuyer.response.body.token}}
+Content-Type: application/json
+
+{
+  "shippingCourier": "JNE Reguler",
+  "shippingCost": 18000.0,
+  "paymentMethod": "BCA_VA",
+  "items": [
+    {
+      "productId": 1,
+      "quantity": 2
+    }
+  ]
+}
+
+###
+
+### 4.2 Cek Dampak Belanja: Stok Berkurang & Total Terjual Bertambah!
+GET {{baseUrl}}/api/products/1
+
+###
+
+### 4.3 Uji Checkout Gagal: Beli Barang Melebihi Stok (Minta 500 Pcs!)
+# Ekspektasi: 400 Bad Request ("Stok tidak mencukupi...")
+POST {{baseUrl}}/api/orders
+Authorization: Bearer {{loginBuyer.response.body.token}}
+Content-Type: application/json
+
+{
+  "shippingCourier": "JNE Reguler",
+  "shippingCost": 18000.0,
+  "paymentMethod": "BCA_VA",
+  "items": [
+    {
+      "productId": 1,
+      "quantity": 500
+    }
+  ]
+}
+
+### ========================================================
+### 5. LOGISTIK & PENGIRIMAN PESANAN
+### ========================================================
+
+### 5.1 Penjual Mengirim Pesanan (Status: SHIPPED)
+# Ekspektasi: Status jadi SHIPPED & otomatis terbit nomor resi kurir!
+PUT {{baseUrl}}/api/orders/1/status?status=SHIPPED
+Authorization: Bearer {{loginSeller.response.body.token}}
+
+###
+
+### 5.2 Batalkan Pesanan (Status: CANCELLED) & Uji Auto-Restock
+# Ekspektasi: Status CANCELLED & stok barang otomatis dikembalikan ke toko!
+PUT {{baseUrl}}/api/orders/1/status?status=CANCELLED
+Authorization: Bearer {{loginSeller.response.body.token}}
