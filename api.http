@@ -255,3 +255,60 @@ Authorization: Bearer {{loginSeller.response.body.token}}
 # Ekspektasi: Status CANCELLED & stok barang otomatis dikembalikan ke toko!
 PUT {{baseUrl}}/api/orders/1/status?status=CANCELLED
 Authorization: Bearer {{loginSeller.response.body.token}}
+
+
+### ========================================================
+### 6. ULASAN & RATING PRODUK (REVIEWS & RATINGS)
+### ========================================================
+
+### 6.1 Uji Coba RBAC: Toko (SELLER) Nekat Memberi Ulasan Sendiri
+# Ekspektasi: 403 Forbidden! (Hanya BUYER yang boleh memberi review)
+POST {{baseUrl}}/api/reviews
+Authorization: Bearer {{loginSeller.response.body.token}}
+Content-Type: application/json
+
+{
+  "productId": 1,
+  "rating": 5,
+  "comment": "Toko sendiri memuji barang sendiri!"
+}
+
+###
+
+### 6.2 Pembeli (Budi - BUYER) Beri Rating Bintang 5 untuk Kopi Gayo (ID 1)
+# Ekspektasi: 201 Created
+POST {{baseUrl}}/api/reviews
+Authorization: Bearer {{loginBuyer.response.body.token}}
+Content-Type: application/json
+
+{
+  "productId": 1,
+  "rating": 5,
+  "comment": "Kopinya harum sekali, rasa asam buahnya pas! Pengiriman kilat."
+}
+
+###
+
+### 6.3 Pembeli Baru (Siti - BUYER) Beri Rating Bintang 4 untuk Kopi Gayo (ID 1)
+# Ekspektasi: 201 Created (Token otomatis dari registerBuyer)
+POST {{baseUrl}}/api/reviews
+Authorization: Bearer {{registerBuyer.response.body.token}}
+Content-Type: application/json
+
+{
+  "productId": 1,
+  "rating": 4,
+  "comment": "Rasa mantap, sedikit kemanisan kalau dicampur susu tapi tetap enak."
+}
+
+###
+
+### 6.4 Cek Dampak Rating pada Produk 1: Lihat ratingAvg dan reviewCount!
+# Ekspektasi: ratingAvg berubah jadi 4.5 (hasil rata-rata dari 5 dan 4), reviewCount = 2!
+GET {{baseUrl}}/api/products/1
+
+###
+
+### 6.5 Publik: Lihat Semua Ulasan pada Kopi Gayo (ID 1)
+# Ekspektasi: 200 OK (Daftar semua testimoni pembeli beserta nama dan ratingnya)
+GET {{baseUrl}}/api/reviews/product/1

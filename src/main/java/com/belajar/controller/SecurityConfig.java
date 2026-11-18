@@ -32,11 +32,12 @@ public class SecurityConfig {
             // 3. Jangan simpan session di server (Full JWT Stateless)
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
-            // 4. ATURAN IZIN AKSES PINTU MASUK API:
+                        // 4. ATURAN IZIN AKSES PINTU MASUK API:
             .authorizeHttpRequests(auth -> auth
                 // Pintu Publik (Bebas tanpa tiket)
                 .requestMatchers("/api/auth/**", "/h2-console/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/products/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/reviews/**").permitAll() // <-- Boleh dibaca siapa saja
 
                 // Pintu Khusus Penjual (Wajib punya tiket bertuliskan SELLER)
                 .requestMatchers(HttpMethod.POST, "/api/products/**").hasRole("SELLER")
@@ -45,6 +46,7 @@ public class SecurityConfig {
 
                 // Pintu Khusus Pembeli (Wajib punya tiket bertuliskan BUYER)
                 .requestMatchers(HttpMethod.POST, "/api/orders/**").hasRole("BUYER")
+                .requestMatchers(HttpMethod.POST, "/api/reviews/**").hasRole("BUYER") // <-- Khusus Pembeli
 
                 // Pesanan lainnya wajib login
                 .requestMatchers("/api/orders/**").authenticated()
@@ -52,6 +54,7 @@ public class SecurityConfig {
                 // Semua rute lainnya wajib login
                 .anyRequest().authenticated()
             )
+            
 
             // 5. Pasang Satpam JWT kita sebelum satpam standar Spring Security
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

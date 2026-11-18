@@ -44,6 +44,9 @@ public class Product {
 
     private Integer totalSold = 0; // Default 0 terjual
 
+    private Double ratingAvg = 0.0; // Nilai rating rata-rata (misal: 4.8)
+    private Integer reviewCount = 0; // Total berapa orang yang memberi ulasan 
+
     public Product() {} // Constructor kosong wajib untuk JPA
 
     public Product(String name, Double price, Integer stock, String category, String description, String imageUrl, String sku, Integer weightGram) {
@@ -91,4 +94,10 @@ public class Product {
 
     public Integer getTotalSold() { return totalSold; }
     public void setTotalSold(Integer totalSold) { this.totalSold = totalSold; }
+
+        public Double getRatingAvg() { return ratingAvg; }
+    public void setRatingAvg(Double ratingAvg) { this.ratingAvg = ratingAvg; }
+
+    public Integer getReviewCount() { return reviewCount; }
+    public void setReviewCount(Integer reviewCount) { this.reviewCount = reviewCount; }
 }
