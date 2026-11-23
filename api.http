@@ -312,3 +312,72 @@ GET {{baseUrl}}/api/products/1
 ### 6.5 Publik: Lihat Semua Ulasan pada Kopi Gayo (ID 1)
 # Ekspektasi: 200 OK (Daftar semua testimoni pembeli beserta nama dan ratingnya)
 GET {{baseUrl}}/api/reviews/product/1
+
+
+### ========================================================
+### 7. KERANJANG BELANJA PERSISTENT (SHOPPING CART)
+### ========================================================
+
+### 7.1 Uji Coba RBAC: Toko (SELLER) Coba Buka Keranjang Belanja
+# Ekspektasi: 403 Forbidden! (Hanya akun bertiket BUYER yang punya keranjang)
+GET {{baseUrl}}/api/cart
+Authorization: Bearer {{loginSeller.response.body.token}}
+
+###
+
+### 7.2 Pembeli (Budi) Tambah 2 Kopi Gayo (ID 1) ke Keranjang Belanja
+# Ekspektasi: 200 OK, keranjang berisi 1 jenis barang (qty: 2, subtotal: Rp 170.000)
+POST {{baseUrl}}/api/cart/items
+Authorization: Bearer {{loginBuyer.response.body.token}}
+Content-Type: application/json
+
+{
+  "productId": 1,
+  "quantity": 2
+}
+
+###
+
+### 7.3 Pembeli (Budi) Tambah 1 Teh Walini (ID 2) ke Keranjang Belanja
+# Ekspektasi: 200 OK, totalItems = 3, totalPrice = Rp 195.000
+POST {{baseUrl}}/api/cart/items
+Authorization: Bearer {{loginBuyer.response.body.token}}
+Content-Type: application/json
+
+{
+  "productId": 2,
+  "quantity": 1
+}
+
+###
+
+### 7.4 Pembeli (Budi) Lihat Isi Keranjang Belanja Saya
+# Ekspektasi: 200 OK, daftar barang belanjaan tersimpan permanen di database
+GET {{baseUrl}}/api/cart
+Authorization: Bearer {{loginBuyer.response.body.token}}
+
+###
+
+### 7.5 Pembeli (Budi) Ubah Jumlah Teh Walini (ID 2) Menjadi 3 Pcs
+# Ganti /items/2 dengan itemId yang sesuai dari respon GET keranjang
+PUT {{baseUrl}}/api/cart/items/2?quantity=3
+Authorization: Bearer {{loginBuyer.response.body.token}}
+
+###
+
+### 7.6 Pembeli (Budi) Hapus Teh Walini dari Keranjang Belanja
+DELETE {{baseUrl}}/api/cart/items/2
+Authorization: Bearer {{loginBuyer.response.body.token}}
+
+###
+
+### 7.7 Uji Validasi: Beli Barang Melebihi Stok Toko (Minta 500 Pcs!)
+# Ekspektasi: 400 Bad Request ("Stok toko tidak mencukupi...")
+POST {{baseUrl}}/api/cart/items
+Authorization: Bearer {{loginBuyer.response.body.token}}
+Content-Type: application/json
+
+{
+  "productId": 1,
+  "quantity": 500
+}

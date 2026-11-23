@@ -48,6 +48,11 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/api/orders/**").hasRole("BUYER")
                 .requestMatchers(HttpMethod.POST, "/api/reviews/**").hasRole("BUYER") // <-- Khusus Pembeli
 
+                // Pintu Khusus Pembeli (Wajib punya tiket bertuliskan BUYER)
+                .requestMatchers(HttpMethod.POST, "/api/orders/**").hasRole("BUYER")
+                .requestMatchers(HttpMethod.POST, "/api/reviews/**").hasRole("BUYER")
+                .requestMatchers("/api/cart/**").hasRole("BUYER") // <-- Tambahkan baris ini!
+
                 // Pesanan lainnya wajib login
                 .requestMatchers("/api/orders/**").authenticated()
 
