@@ -2,12 +2,14 @@ package com.belajar.service;
 
 import com.belajar.dto.CheckoutRequest;
 import com.belajar.model.*;
+import com.belajar.repository.CouponRepository;
 import com.belajar.repository.OrderRepository;
 import com.belajar.repository.ProductRepository;
 import com.belajar.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -17,11 +19,13 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
+    private final CouponRepository couponRepository; // 1. Suntikkan CouponRepository
 
-    public OrderService(OrderRepository orderRepository, ProductRepository productRepository, UserRepository userRepository) {
+    public OrderService(OrderRepository orderRepository, ProductRepository productRepository, UserRepository userRepository, CouponRepository couponRepository) {
         this.orderRepository = orderRepository;
         this.productRepository = productRepository;
         this.userRepository = userRepository;
+        this.couponRepository = couponRepository;
     }
 
     public List<Order> getAllOrders() {
@@ -34,7 +38,6 @@ public class OrderService {
 
     @Transactional
     public Order checkout(CheckoutRequest request, String buyerEmail) {
-        // 1. Ambil data pembeli langsung dari email yang ada di tiket JWT
         User buyer = userRepository.findByEmail(buyerEmail)
                 .orElseThrow(() -> new IllegalArgumentException("Pembeli dengan email " + buyerEmail + " tidak ditemukan!"));
 
@@ -42,7 +45,6 @@ public class OrderService {
             throw new IllegalStateException("Hanya akun dengan role BUYER yang berhak belanja!");
         }
 
-        // Jika alamat tidak diisi di request, pakai alamat tersimpan di profil pembeli
         String address = (request.shippingAddress() != null && !request.shippingAddress().isBlank()) 
                 ? request.shippingAddress() 
                 : buyer.getAddress();
@@ -53,32 +55,58 @@ public class OrderService {
 
         Order order = new Order(buyer, address, courier, shippingCost, paymentMethod);
 
-        // 2. Loop setiap barang di keranjang belanja
+        // Loop setiap barang belanjaan
         for (var item : request.items()) {
             Product product = productRepository.findById(item.productId())
                     .orElseThrow(() -> new IllegalArgumentException("Produk ID " + item.productId() + " tidak ditemukan!"));
 
-            // Validasi Stok
             if (product.getStock() < item.quantity()) {
                 throw new IllegalStateException("Stok tidak mencukupi untuk: " + product.getName() 
                         + " (Sisa: " + product.getStock() + ", Diminta: " + item.quantity() + ")");
             }
 
-            // Potong stok dan tambah angka total terjual!
             product.setStock(product.getStock() - item.quantity());
             product.setTotalSold(product.getTotalSold() + item.quantity());
             productRepository.save(product);
 
-            // Buat snapshot rincian barang
             OrderItem orderItem = new OrderItem(order, product.getId(), product.getName(), product.getPrice(), item.quantity());
             order.addItem(orderItem);
         }
 
-        // 3. Simpan pesanan utuh ke database SQL
+        // 2. LOGIKA KUPON DISKON PROMO
+        if (request.couponCode() != null && !request.couponCode().isBlank()) {
+            Coupon coupon = couponRepository.findByCodeIgnoreCase(request.couponCode().trim())
+                    .orElseThrow(() -> new IllegalArgumentException("Kupon dengan kode '" + request.couponCode() + "' tidak ditemukan!"));
+
+            if (!coupon.getActive()) {
+                throw new IllegalStateException("Kupon '" + coupon.getCode() + "' sudah tidak aktif!");
+            }
+            if (coupon.getExpiryDate() != null && LocalDateTime.now().isAfter(coupon.getExpiryDate())) {
+                throw new IllegalStateException("Kupon '" + coupon.getCode() + "' sudah kedaluwarsa!");
+            }
+            if (coupon.getUsedCount() >= coupon.getUsageLimit()) {
+                throw new IllegalStateException("Kupon '" + coupon.getCode() + "' sudah habis kuota pemakaiannya!");
+            }
+            if (order.getTotalAmount() < coupon.getMinPurchase()) {
+                throw new IllegalStateException("Total belanja belum memenuhi syarat minimal belanja kupon (Min: Rp " + coupon.getMinPurchase() + ")!");
+            }
+
+            Double discount = coupon.calculateDiscount(order.getTotalAmount());
+            order.setCouponCode(coupon.getCode());
+            order.setDiscountAmount(discount);
+
+            // Hitung ulang Grand Total: (Total Barang - Diskon) + Ongkir
+            double finalGrandTotal = Math.max(0.0, (order.getTotalAmount() - discount) + order.getShippingCost());
+            order.setGrandTotal(finalGrandTotal);
+
+            // Tambah counter pemakaian kupon
+            coupon.setUsedCount(coupon.getUsedCount() + 1);
+            couponRepository.save(coupon);
+        }
+
         return orderRepository.save(order);
     }
 
-    // Fitur Ubah Status & Auto-Restock saat pesanan dibatalkan
     @Transactional
     public Order updateStatus(Long orderId, OrderStatus newStatus) {
         Order order = orderRepository.findById(orderId)
@@ -88,21 +116,27 @@ public class OrderService {
             throw new IllegalStateException("Pesanan yang sudah CANCELLED tidak bisa diubah statusnya lagi!");
         }
 
-        // FITUR AUTO-RESTOCK: Jika pesanan dibatalkan, kembalikan stok barang ke toko!
+        // Jika pesanan dibatalkan, kembalikan stok & kuota kupon!
         if (newStatus == OrderStatus.CANCELLED) {
             for (var item : order.getItems()) {
                 productRepository.findById(item.getProductId()).ifPresent(product -> {
-                    product.setStock(product.getStock() + item.getQuantity()); // Kembalikan stok!
+                    product.setStock(product.getStock() + item.getQuantity());
                     productRepository.save(product);
+                });
+            }
+
+            // Kembalikan kuota kupon (refund quota)
+            if (order.getCouponCode() != null) {
+                couponRepository.findByCodeIgnoreCase(order.getCouponCode()).ifPresent(coupon -> {
+                    coupon.setUsedCount(Math.max(0, coupon.getUsedCount() - 1));
+                    couponRepository.save(coupon);
                 });
             }
         }
 
-            // Jika status berubah jadi SHIPPED, generate nomor resi otomatis (kalau belum ada resi)
         if (newStatus == OrderStatus.SHIPPED && order.getTrackingNumber() == null) {
             order.setTrackingNumber("RESI-JNE-" + System.currentTimeMillis());
         }
-
 
         order.setStatus(newStatus);
         return orderRepository.save(order);

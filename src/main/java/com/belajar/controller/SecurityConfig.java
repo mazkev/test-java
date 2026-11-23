@@ -51,6 +51,7 @@ public class SecurityConfig {
                 // Pintu Khusus Pembeli (Wajib punya tiket bertuliskan BUYER)
                 .requestMatchers(HttpMethod.POST, "/api/orders/**").hasRole("BUYER")
                 .requestMatchers(HttpMethod.POST, "/api/reviews/**").hasRole("BUYER")
+                .requestMatchers(HttpMethod.GET, "/api/coupons/**").permitAll()
                 .requestMatchers("/api/cart/**").hasRole("BUYER") // <-- Tambahkan baris ini!
 
                 // Pesanan lainnya wajib login

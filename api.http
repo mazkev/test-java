@@ -381,3 +381,104 @@ Content-Type: application/json
   "productId": 1,
   "quantity": 500
 }
+
+
+### ========================================================
+### 8. KUPON DISKON & PROMO BELANJA (COUPONS & PROMOTIONS)
+### ========================================================
+
+### 8.1 Publik: Lihat Semua Kupon Promo yang Aktif
+# Ekspektasi: 200 OK (Daftar kupon DISKON10 dan HEMAT20RB)
+GET {{baseUrl}}/api/coupons
+
+###
+
+### 8.2 Cek Validasi Kupon Sebelum Checkout
+# Ekspektasi: 200 OK, "discountAmount": 17000.0, "valid": true
+GET {{baseUrl}}/api/coupons/check?code=DISKON10&amount=170000
+
+###
+
+### 8.3 Pembeli (Budi) Checkout Belanja DENGAN Kupon Diskon Persen ("DISKON10")
+# Ekspektasi: 201 Created!
+# totalAmount: 170.000, discountAmount: 17.000, shippingCost: 18.000, grandTotal: 171.000!
+POST {{baseUrl}}/api/orders
+Authorization: Bearer {{loginBuyer.response.body.token}}
+Content-Type: application/json
+
+{
+  "shippingCourier": "JNE Reguler",
+  "shippingCost": 18000.0,
+  "paymentMethod": "BCA_VA",
+  "couponCode": "DISKON10",
+  "items": [
+    {
+      "productId": 1,
+      "quantity": 2
+    }
+  ]
+}
+
+###
+
+### 8.4 Pembeli (Budi) Checkout Belanja DENGAN Kupon Potongan Tetap ("HEMAT20RB")
+# Ekspektasi: 201 Created! discountAmount: 20.000
+POST {{baseUrl}}/api/orders
+Authorization: Bearer {{loginBuyer.response.body.token}}
+Content-Type: application/json
+
+{
+  "shippingCourier": "SiCepat",
+  "shippingCost": 15000.0,
+  "paymentMethod": "GOPAY",
+  "couponCode": "HEMAT20RB",
+  "items": [
+    {
+      "productId": 1,
+      "quantity": 1
+    }
+  ]
+}
+
+###
+
+### 8.5 Uji Validasi: Pakai Kupon Palsu / Asal-Asalan
+# Ekspektasi: 400 Bad Request ("Kupon dengan kode 'DISKONPALSU' tidak ditemukan!")
+POST {{baseUrl}}/api/orders
+Authorization: Bearer {{loginBuyer.response.body.token}}
+Content-Type: application/json
+
+{
+  "shippingCourier": "JNE Reguler",
+  "shippingCost": 18000.0,
+  "paymentMethod": "BCA_VA",
+  "couponCode": "DISKONPALSU",
+  "items": [
+    {
+      "productId": 1,
+      "quantity": 1
+    }
+  ]
+}
+
+###
+
+### 8.6 Uji Validasi: Pakai Kupon Tapi Belanja Belum Mencapai Syarat Minimal
+# Kupon HEMAT20RB syarat minimal belanja Rp 70.000, tapi beli Teh Walini hanya Rp 25.000!
+# Ekspektasi: 400 Bad Request ("Total belanja belum memenuhi syarat minimal belanja kupon...")
+POST {{baseUrl}}/api/orders
+Authorization: Bearer {{loginBuyer.response.body.token}}
+Content-Type: application/json
+
+{
+  "shippingCourier": "JNE Reguler",
+  "shippingCost": 10000.0,
+  "paymentMethod": "BCA_VA",
+  "couponCode": "HEMAT20RB",
+  "items": [
+    {
+      "productId": 2,
+      "quantity": 1
+    }
+  ]
+}

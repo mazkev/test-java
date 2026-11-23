@@ -13,7 +13,8 @@ public record CheckoutRequest(
     String shippingAddress,
     String shippingCourier,
     Double shippingCost,
-    String paymentMethod
+    String paymentMethod,
+    String couponCode
 ) {
     public record CartItemDto(
         @NotNull(message = "ID Produk wajib diisi!")

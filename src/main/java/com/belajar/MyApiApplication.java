@@ -26,6 +26,7 @@ public class MyApiApplication {
     public CommandLineRunner initData(
             ProductRepository productRepository, 
             com.belajar.repository.UserRepository userRepository,
+            com.belajar.repository.CouponRepository couponRepository,
             PasswordEncoder passwordEncoder) {
         return args -> {
             // Password bawaan untuk testing: "password123" yang sudah di-hash BCrypt
@@ -68,6 +69,28 @@ public class MyApiApplication {
                 "KOP-GAYO-250G",
                 250
             );
+
+             // 4. Seeder Kupon Promo Belanja
+            couponRepository.save(new com.belajar.model.Coupon(
+                "DISKON10",
+                com.belajar.model.DiscountType.PERCENTAGE,
+                10.0,
+                50000.0,
+                30000.0,
+                java.time.LocalDateTime.now().plusMonths(1),
+                100
+            ));
+            couponRepository.save(new com.belajar.model.Coupon(
+                "HEMAT20RB",
+                com.belajar.model.DiscountType.FIXED_AMOUNT,
+                20000.0,
+                70000.0,
+                null,
+                java.time.LocalDateTime.now().plusMonths(1),
+                50
+            ));
+           
+            
             p1.setSeller(tokoKopi);
             productRepository.save(p1);
 
